@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Mail, Phone, MapPin } from "lucide-react";
 import "./Footer.css";
 
@@ -105,8 +105,8 @@ export default function Footer() {
             &copy; {currentYear} Faza Gift House. All rights reserved.
           </p>
           <div className="footer-legal-links">
-            <a href="#privacy" onClick={(e) => e.preventDefault()}>Privacy Policy</a>
-            <a href="#terms" onClick={(e) => e.preventDefault()}>Terms & Conditions</a>
+            <Link to="/privacy">Privacy Policy</Link>
+            <Link to="/terms">Terms & Conditions</Link>
           </div>
         </div>
       </div>

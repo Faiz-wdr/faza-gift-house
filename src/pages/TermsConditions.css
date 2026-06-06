@@ -1,0 +1,369 @@
+/* ==========================================================================
+   FAZA GIFT HOUSE - TERMS & CONDITIONS STYLES
+   ========================================================================== */
+
+.terms-page-container {
+  background-color: var(--bg-color);
+  min-height: 100vh;
+  padding-top: 120px; /* Space for the sticky header */
+  padding-bottom: 5rem;
+}
+
+/* 1. HERO SECTION */
+.terms-hero {
+  text-align: center;
+  padding: 3.5rem 0 2rem 0;
+}
+
+.terms-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background-color: var(--primary-light);
+  color: var(--primary-color);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.35rem 0.8rem;
+  border-radius: 30px;
+  margin-bottom: 1.2rem;
+  box-shadow: 0 2px 8px rgba(14, 90, 60, 0.03);
+}
+
+.terms-title {
+  font-family: var(--font-heading);
+  font-size: 3.2rem;
+  color: var(--primary-color);
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.terms-subtitle {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  max-width: 680px;
+  margin: 0 auto 2.2rem auto;
+  line-height: 1.65;
+}
+
+.terms-hero-divider {
+  width: 80px;
+  height: 3px;
+  background-color: var(--accent-color);
+  margin: 0 auto;
+  border-radius: 2px;
+}
+
+/* 2. TWO-COLUMN LAYOUT */
+.terms-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 4.5rem;
+  margin-top: 3rem;
+  align-items: flex-start;
+}
+
+/* Left Sidebar Table of Contents */
+.terms-sidebar {
+  position: sticky;
+  top: 110px; /* Offset below sticky navbar */
+  height: auto;
+}
+
+.terms-toc-card {
+  background-color: var(--white);
+  border-radius: var(--radius-md);
+  padding: 1.6rem;
+  border: 1px solid var(--border-color-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.terms-toc-header {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  color: var(--primary-color);
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1.5px solid var(--border-color);
+}
+
+.terms-toc-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.terms-toc-link {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-decoration: none;
+  transition: var(--transition-fast);
+  line-height: 1.4;
+  padding: 0.25rem 0;
+}
+
+.terms-toc-link:hover {
+  color: var(--primary-color);
+  transform: translateX(4px);
+}
+
+.terms-toc-link.active {
+  color: var(--primary-color);
+  font-weight: 700;
+  transform: translateX(6px);
+  position: relative;
+}
+
+.terms-toc-link.active::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: var(--accent-color);
+  box-shadow: 0 0 6px var(--accent-color);
+}
+
+/* Right Content Column */
+.terms-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3.5rem;
+}
+
+/* Custom Order Warning Notice Box */
+.custom-order-notice-box {
+  scroll-margin-top: 120px;
+  display: flex;
+  gap: 1.2rem;
+  background-color: rgba(230, 179, 37, 0.06); /* Soft accent yellow-tinted background */
+  border: 1px solid rgba(230, 179, 37, 0.15);
+  border-left: 4px solid var(--accent-color);
+  border-radius: var(--radius-md);
+  padding: 2rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.notice-icon-wrapper {
+  color: var(--accent-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.notice-content h4 {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.notice-content p {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 0;
+}
+
+/* Terms Sections */
+.terms-section {
+  scroll-margin-top: 120px; /* Offset for sticky navbar */
+  background-color: var(--white);
+  border-radius: var(--radius-md);
+  padding: 2.2rem;
+  border: 1px solid var(--border-color-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.terms-section h2 {
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  color: var(--primary-color);
+  margin-bottom: 1.2rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.terms-section p {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.75;
+  margin-bottom: 1.2rem;
+}
+
+.terms-section ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-left: 0.5rem;
+  margin-bottom: 1.2rem;
+}
+
+.terms-section ul li {
+  position: relative;
+  padding-left: 1.4rem;
+  font-family: var(--font-body);
+  font-size: 0.93rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.terms-section ul li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--accent-color);
+}
+
+.terms-section p:last-child,
+.terms-section ul:last-child {
+  margin-bottom: 0;
+}
+
+.policy-last-updated {
+  font-size: 0.85rem !important;
+  color: rgba(92, 85, 75, 0.6) !important;
+  margin-top: 1.5rem;
+}
+
+/* 3. CONTACT BOX SECTION */
+.contact-terms-section {
+  border: 1px solid rgba(14, 90, 60, 0.08) !important;
+}
+
+.terms-contact-card {
+  background-color: rgba(14, 90, 60, 0.03); /* Soft elegant green-tinted background */
+  border-radius: 12px;
+  padding: 2rem;
+  border: 1px solid rgba(14, 90, 60, 0.06);
+  margin-top: 1.8rem;
+  box-shadow: inset 0 2px 4px rgba(14, 90, 60, 0.01);
+}
+
+.terms-contact-brand {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  color: var(--primary-color);
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.01em;
+}
+
+.terms-contact-info-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.8rem;
+}
+
+.terms-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+}
+
+.terms-info-icon {
+  color: var(--primary-color);
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+.terms-info-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: rgba(14, 90, 60, 0.5);
+  letter-spacing: 0.06em;
+  margin-bottom: 0.25rem;
+}
+
+.terms-info-val {
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  color: var(--text-dark);
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+a.terms-info-val:hover {
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
+.text-address {
+  line-height: 1.35;
+  display: block;
+}
+
+/* ==========================================================================
+   RESPONSIVE OVERRIDES
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+  .terms-layout {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .terms-sidebar {
+    display: none; /* Hide sidebar table of contents on smaller tablet and mobile screens */
+  }
+
+  .terms-contact-info-list {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .terms-page-container {
+    padding-top: 100px;
+    padding-bottom: 3.5rem;
+  }
+
+  .terms-title {
+    font-size: 2.4rem;
+  }
+
+  .terms-subtitle {
+    font-size: 0.98rem;
+    margin-bottom: 1.8rem;
+  }
+
+  .terms-section {
+    padding: 1.6rem;
+  }
+
+  .terms-section h2 {
+    font-size: 1.35rem;
+  }
+
+  .terms-contact-card {
+    padding: 1.5rem;
+  }
+
+  .terms-contact-info-list {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+}

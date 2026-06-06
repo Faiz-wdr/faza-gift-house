@@ -6,6 +6,8 @@ import Home from "./pages/Home";
 import Products from "./pages/Products";
 import Login from "./pages/Login";
 import Admin from "./pages/Admin";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsConditions from "./pages/TermsConditions";
 import SmoothScroll from "./components/SmoothScroll";
 import useScrollReveal from "./hooks/useScrollReveal";
 
@@ -51,6 +53,8 @@ function AppContent() {
         <Route path="/products" element={<Products />} />
         <Route path="/login" element={<Login />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsConditions />} />
       </Routes>
       {!isNoLayoutRoute && <Footer />}
     </>
