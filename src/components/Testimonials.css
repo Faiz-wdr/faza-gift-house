@@ -1,0 +1,117 @@
+.testimonials-section {
+  background-color: var(--bg-color);
+  padding: 6rem 0;
+  border-top: 1px solid rgba(14, 90, 60, 0.05);
+}
+
+.testimonials-header {
+  text-align: center;
+  margin-bottom: 4.5rem;
+}
+
+.testimonials-title {
+  font-size: clamp(2.2rem, 3.5vw, 3rem);
+  color: var(--primary-color);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+/* Grid Layout */
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.5rem;
+}
+
+/* Card Styling */
+.testimonial-card {
+  background-color: var(--card-bg);
+  border-radius: var(--radius-md);
+  padding: 2.5rem 2.2rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color-light);
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
+  will-change: transform, box-shadow;
+}
+
+.testimonial-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-hover);
+  border-color: rgba(14, 90, 60, 0.08);
+}
+
+.testimonial-stars {
+  display: flex;
+  gap: 0.15rem;
+}
+
+.testimonial-text {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text-muted);
+  font-style: italic;
+  font-family: var(--font-body);
+  flex-grow: 1;
+}
+
+.testimonial-user {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid rgba(14, 90, 60, 0.05);
+  padding-top: 1.2rem;
+}
+
+.testimonial-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(14, 90, 60, 0.1);
+  background-color: #ECE7DF;
+}
+
+.testimonial-meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.testimonial-name {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin: 0;
+}
+
+.testimonial-role {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Responsiveness */
+@media (max-width: 992px) {
+  .testimonials-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    max-width: 380px;
+    margin: 0 auto;
+  }
+  
+  .testimonial-card {
+    padding: 2rem;
+  }
+}

@@ -1,0 +1,249 @@
+/* ==========================================================================
+   FAZA GIFT HOUSE - ADMIN PRODUCT PREVIEW MODAL STYLES
+   ========================================================================== */
+
+.preview-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(31, 27, 21, 0.45);
+  backdrop-filter: blur(5px);
+  z-index: 2500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+
+.preview-modal-card {
+  background-color: var(--white);
+  width: 100%;
+  max-width: 820px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  border: 1px solid var(--border-color-light);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  position: relative;
+  z-index: 2505;
+}
+
+.preview-modal-header {
+  padding: 1.2rem 1.8rem;
+  border-bottom: 1px solid rgba(14, 90, 60, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #FAF8F5;
+}
+
+.preview-modal-header h3 {
+  font-family: var(--font-heading);
+  color: var(--primary-color);
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.preview-close-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  transition: var(--transition-fast);
+}
+
+.preview-close-btn:hover {
+  color: var(--primary-color);
+  transform: rotate(90deg);
+}
+
+.preview-modal-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+  padding: 2.5rem;
+  overflow-y: auto;
+}
+
+/* Left side: Image styling */
+.preview-image-section {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background-color: #ECE7DF;
+  border: 1px solid rgba(14, 90, 60, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-image-section img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Right side: Option config and selectors */
+.preview-details-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  text-align: left;
+}
+
+.preview-info-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.preview-title {
+  font-family: var(--font-heading);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  line-height: 1.25;
+}
+
+.preview-id-badge {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  background-color: #F0EDE6;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  align-self: flex-start;
+  user-select: none;
+}
+
+.preview-option-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.option-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.preview-chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+/* Interactive custom chips */
+.preview-chip {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid rgba(14, 90, 60, 0.15);
+  background-color: transparent;
+  color: var(--primary-color);
+  padding: 0.5rem 1rem;
+  border-radius: var(--btn-radius);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  outline: none;
+}
+
+.preview-chip:hover {
+  background-color: rgba(14, 90, 60, 0.03);
+  border-color: var(--primary-color);
+}
+
+.preview-chip.active {
+  background-color: var(--primary-color);
+  color: var(--white);
+  border-color: var(--primary-color);
+}
+
+.size-name {
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.size-dims {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.preview-chip.active .size-dims {
+  color: rgba(245, 241, 234, 0.8);
+}
+
+/* Dynamic Pricing Container */
+.preview-price-summary {
+  background-color: #FAF8F5;
+  border-radius: 8px;
+  padding: 1.2rem 1.5rem;
+  border: 1px solid rgba(14, 90, 60, 0.05);
+}
+
+.price-label-row {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.price-value-large {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--primary-color);
+  margin-top: 0.2rem;
+  line-height: 1.1;
+}
+
+.preview-order-btn {
+  margin-top: 0.5rem;
+}
+
+/* RESPONSIVE LAYOUTS */
+@media (max-width: 768px) {
+  .preview-modal-card {
+    max-width: 480px;
+    height: 90vh;
+  }
+
+  .preview-modal-body {
+    grid-template-columns: 1fr;
+    gap: 1.6rem;
+    padding: 1.8rem;
+  }
+
+  .preview-image-section {
+    max-width: 320px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .preview-modal-card {
+    height: 100vh;
+    border-radius: 0;
+    max-height: 100vh;
+  }
+}

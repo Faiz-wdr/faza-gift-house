@@ -1,0 +1,14 @@
+{
+  "rewrites": [
+    {
+      "source": "/health",
+      "destination": "/api/keep-alive"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/keep-alive",
+      "schedule": "0 0 */5 * *"
+    }
+  ]
+}

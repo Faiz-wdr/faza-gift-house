@@ -1,0 +1,116 @@
+.bulk-cta-section {
+  background-color: var(--bg-color);
+  padding: 5rem 0;
+}
+
+.bulk-banner {
+  background-color: var(--primary-color);
+  color: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 5.5rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Subtle luxury background elements for depth */
+.bulk-banner::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  left: -10%;
+  width: 350px;
+  height: 350px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(230, 179, 37, 0.08) 0%, rgba(255, 255, 255, 0) 70%);
+  pointer-events: none;
+}
+
+.bulk-banner::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  right: -5%;
+  width: 450px;
+  height: 450px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 75%);
+  pointer-events: none;
+}
+
+.bulk-content {
+  max-width: 680px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  position: relative;
+  z-index: 5;
+}
+
+.bulk-title {
+  color: var(--bg-color);
+  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.bulk-text {
+  color: rgba(245, 241, 234, 0.8);
+  font-size: clamp(0.95rem, 1.2vw, 1.1rem);
+  line-height: 1.7;
+  max-width: 580px;
+  margin-bottom: 1rem;
+}
+
+/* WhatsApp CTA Button */
+.btn-whatsapp {
+  background-color: var(--white);
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.9rem 2.2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.btn-whatsapp:hover {
+  background-color: var(--bg-color);
+  color: var(--primary-hover);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(14, 90, 60, 0.25);
+}
+
+.btn-whatsapp:active {
+  transform: translateY(0) scale(1);
+}
+
+.btn-whatsapp svg {
+  transition: transform 0.3s ease;
+}
+
+.btn-whatsapp:hover svg {
+  transform: scale(1.1) rotate(5deg);
+}
+
+/* Override Reveal Behavior for CTA box (Fade + Scale) */
+.bulk-banner.reveal-element {
+  opacity: 0;
+  transform: translateY(40px) scale(0.96);
+  transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bulk-banner.reveal-element.revealed {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Responsive adjustment */
+@media (max-width: 768px) {
+  .bulk-banner {
+    padding: 4rem 1.5rem;
+  }
+}

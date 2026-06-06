@@ -1,0 +1,462 @@
+/* ==========================================================================
+   FAZA GIFT HOUSE - ADMIN AD BANNER MANAGER STYLES
+   ========================================================================== */
+
+.admin-ad-banner-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2.2rem;
+  position: relative;
+}
+
+/* 1. TOAST NOTIFICATION */
+.banner-toast {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3000;
+  padding: 0.8rem 1.6rem;
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  pointer-events: none;
+}
+
+.banner-toast.success {
+  background-color: var(--primary-color);
+  color: var(--white);
+}
+
+.banner-toast.success svg {
+  color: var(--accent-color);
+}
+
+.banner-toast.warning {
+  background-color: #FFFBEB;
+  color: #B45309;
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.banner-toast.warning svg {
+  color: #D97706;
+}
+
+/* 2. PAGE HEADER Row */
+.banner-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.banner-page-header h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.page-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+.btn-restore-defaults {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.55rem 1rem;
+  border-radius: 6px;
+  border: 1px solid rgba(14, 90, 60, 0.2);
+  background-color: transparent;
+  color: var(--primary-color);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  outline: none;
+}
+
+.btn-restore-defaults:hover {
+  background-color: var(--primary-light);
+  border-color: var(--primary-color);
+}
+
+/* 3. LAYOUT GRID */
+.banner-layout-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1.4fr;
+  gap: 2.2rem;
+}
+
+.banner-settings-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+}
+
+/* 4. SPECIFICATIONS CARD */
+.banner-info-card {
+  background-color: var(--white);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color-light);
+  box-shadow: var(--shadow-sm);
+  padding: 1.8rem;
+}
+
+.banner-info-card h3 {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  border-bottom: 1.5px solid rgba(14, 90, 60, 0.05);
+  padding-bottom: 0.6rem;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.specs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin-bottom: 1.2rem;
+}
+
+.spec-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.spec-label {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.spec-value {
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.spec-value.highlight {
+  color: var(--primary-color);
+}
+
+.specs-note {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  background-color: #FAF8F5;
+  border-radius: 8px;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid rgba(14, 90, 60, 0.04);
+}
+
+/* 5. UPLOAD ZONE */
+.upload-drop-zone-card {
+  background-color: var(--white);
+  border-radius: var(--radius-md);
+  border: 2px dashed rgba(14, 90, 60, 0.15);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-medium);
+  overflow: hidden;
+  position: relative;
+}
+
+.upload-drop-zone-card:hover:not(.disabled) {
+  border-color: var(--primary-color);
+  background-color: rgba(14, 90, 60, 0.01);
+}
+
+.upload-drop-zone-card.disabled {
+  background-color: #FAF9F6;
+  border-color: rgba(31, 27, 21, 0.08);
+  opacity: 0.75;
+}
+
+.banner-file-input {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.banner-file-input:disabled {
+  cursor: not-allowed;
+}
+
+.drop-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3.5rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.drop-label.drag-active {
+  background-color: var(--primary-light);
+}
+
+.upload-icon-wrapper {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background-color: var(--primary-light);
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.1rem;
+  transition: var(--transition-fast);
+}
+
+.upload-drop-zone-card:hover:not(.disabled) .upload-icon-wrapper {
+  background-color: var(--primary-color);
+  color: var(--white);
+  transform: scale(1.05);
+}
+
+.drop-label h4 {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 0.25rem;
+}
+
+.drop-label p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.file-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+/* 6. LIST PANEL & THUMBNAILS */
+.banner-list-panel {
+  background-color: var(--white);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color-light);
+  box-shadow: var(--shadow-sm);
+  padding: 1.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-height: 400px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1.5px solid rgba(14, 90, 60, 0.05);
+  padding-bottom: 1rem;
+}
+
+.panel-header h3 {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  text-transform: uppercase;
+}
+
+.status-indicator {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  background-color: var(--primary-light);
+  padding: 0.22rem 0.6rem;
+  border-radius: 4px;
+}
+
+.default-fallback-placeholder {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 2rem;
+  color: var(--text-muted);
+  gap: 0.8rem;
+}
+
+.placeholder-icon {
+  color: rgba(14, 90, 60, 0.12);
+  margin-bottom: 0.5rem;
+}
+
+.default-fallback-placeholder h4 {
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  color: var(--primary-color);
+}
+
+.default-fallback-placeholder p {
+  font-size: 0.85rem;
+  max-width: 320px;
+  line-height: 1.5;
+}
+
+.active-banners-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.banner-slide-item-card {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  background-color: #FAF8F5;
+  border: 1px solid rgba(14, 90, 60, 0.06);
+  border-radius: 12px;
+  gap: 1.2rem;
+  position: relative;
+  transition: var(--transition-fast);
+}
+
+.banner-slide-item-card:hover {
+  border-color: rgba(14, 90, 60, 0.15);
+  box-shadow: 0 4px 12px rgba(31, 27, 21, 0.02);
+}
+
+.banner-thumbnail-container {
+  position: relative;
+  width: 140px;
+  aspect-ratio: 16 / 6.2;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(14, 90, 60, 0.1);
+  background-color: #ECE7DF;
+  flex-shrink: 0;
+}
+
+.banner-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.banner-slide-badge {
+  position: absolute;
+  top: 4px; left: 4px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--white);
+  background-color: rgba(14, 90, 60, 0.85);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  backdrop-filter: blur(2px);
+}
+
+.banner-details {
+  flex-grow: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.banner-name {
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.banner-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.banner-meta strong {
+  color: var(--text-dark);
+}
+
+.banner-meta .dot {
+  opacity: 0.4;
+}
+
+.btn-delete-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background-color: transparent;
+  color: #DC2626;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  outline: none;
+  flex-shrink: 0;
+}
+
+.btn-delete-banner:hover {
+  background-color: #FFF5F5;
+  border-color: rgba(220, 38, 38, 0.15);
+}
+
+/* 7. RESPONSIVENESS */
+@media (max-width: 1200px) {
+  .banner-layout-grid {
+    grid-template-columns: 1fr;
+    gap: 1.8rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .banner-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .btn-restore-defaults {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .banner-slide-item-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+
+  .banner-thumbnail-container {
+    width: 100%;
+    max-width: 240px;
+  }
+
+  .btn-delete-banner {
+    align-self: flex-end;
+    position: absolute;
+    bottom: 1rem; right: 1rem;
+  }
+}

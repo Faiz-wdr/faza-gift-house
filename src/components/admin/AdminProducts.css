@@ -1,0 +1,317 @@
+/* ==========================================================================
+   FAZA GIFT HOUSE - ADMIN PRODUCTS LIST STYLES
+   ========================================================================== */
+
+.admin-products-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2.2rem;
+}
+
+.products-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1.5px solid rgba(14, 90, 60, 0.06);
+  padding-bottom: 1.2rem;
+}
+
+.products-list-header h3 {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.products-list-header p {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-top: 0.1rem;
+}
+
+.btn-add-product {
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.65rem 1.2rem;
+  border-radius: var(--btn-radius);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Products Cards Grid */
+.products-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.admin-product-card {
+  background-color: var(--white);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color-light);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease;
+  will-change: transform, box-shadow;
+}
+
+.admin-product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-hover);
+  border-color: rgba(14, 90, 60, 0.08);
+}
+
+.admin-card-image-box {
+  width: 100%;
+  aspect-ratio: 1.2 / 1;
+  background-color: #ECE7DF;
+  overflow: hidden;
+  position: relative;
+  border-bottom: 1px solid rgba(14, 90, 60, 0.04);
+}
+
+.admin-card-image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.featured-card-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background-color: var(--accent-color);
+  color: var(--text-dark);
+  padding: 0.2rem 0.6rem;
+  border-radius: 30px;
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-card-details {
+  padding: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  flex-grow: 1;
+}
+
+.admin-card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.admin-card-title {
+  font-family: var(--font-heading);
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  line-height: 1.25;
+}
+
+.admin-card-id {
+  font-size: 0.7rem;
+  font-family: var(--mono);
+  color: var(--text-muted);
+  background-color: #FAF8F5;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  border: 1px solid rgba(14, 90, 60, 0.04);
+  flex-shrink: 0;
+}
+
+/* Dynamic Configuration Summary Row */
+.admin-card-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  border-bottom: 1px solid rgba(14, 90, 60, 0.05);
+  padding-bottom: 0.8rem;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+}
+
+.summary-label {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.summary-value {
+  color: var(--text-dark);
+  font-weight: 600;
+  text-align: right;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-card-price-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.price-preview-label {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.price-preview-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  line-height: 1.1;
+}
+
+/* Action button items */
+.admin-card-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+  border-top: 1px solid rgba(14, 90, 60, 0.05);
+  padding-top: 0.8rem;
+}
+
+.btn-action-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.5rem 0.2rem;
+  border-radius: var(--btn-radius);
+  border: 1px solid rgba(14, 90, 60, 0.15);
+  background-color: transparent;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  outline: none;
+}
+
+.btn-action-icon svg {
+  flex-shrink: 0;
+}
+
+.preview-btn {
+  color: var(--primary-color);
+}
+
+.preview-btn:hover {
+  background-color: var(--primary-light);
+  border-color: var(--primary-color);
+}
+
+.edit-btn {
+  color: #2563EB;
+}
+
+.edit-btn:hover {
+  background-color: #EFF6FF;
+  border-color: #2563EB;
+}
+
+.delete-btn {
+  color: #DC2626;
+}
+
+.delete-btn:hover {
+  background-color: #FFF5F5;
+  border-color: #DC2626;
+}
+
+/* Responsive Grid Adaptation */
+@media (max-width: 992px) {
+  .products-admin-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .products-list-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .products-actions-group {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 600px) {
+  .products-admin-grid {
+    grid-template-columns: 1fr;
+    max-width: 360px;
+    margin: 0 auto;
+  }
+}
+
+/* CSV Buttons Styling */
+.products-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.btn-csv-import {
+  cursor: pointer;
+}
+
+.btn-csv-import input[type="file"] {
+  display: none;
+}
+
+.btn-secondary {
+  background-color: var(--white);
+  border: 1px solid var(--border-color-light, #ece7df);
+  color: var(--text-dark, #3c3429);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.65rem 1rem;
+  border-radius: var(--btn-radius);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover:not(:disabled),
+.btn-csv-import:hover:not(.disabled) {
+  background-color: #FAF8F5;
+  border-color: var(--primary-color, #0e5a3c);
+  color: var(--primary-color, #0e5a3c);
+}
+
+.btn-secondary:disabled,
+.btn-csv-import.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.spinner-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
