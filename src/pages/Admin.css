@@ -659,3 +659,26 @@
     padding: 1.5rem;
   }
 }
+
+@media (max-width: 480px) {
+  .admin-header {
+    padding: 0 1rem;
+  }
+
+  .dashboard-content {
+    padding: 1rem;
+    gap: 1.5rem;
+  }
+
+  .stats-row {
+    gap: 0.8rem;
+  }
+
+  .stat-card {
+    padding: 1.2rem 1rem;
+  }
+
+  .recent-orders-container {
+    padding: 1.2rem 1rem;
+  }
+}

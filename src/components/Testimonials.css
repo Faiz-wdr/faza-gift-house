@@ -115,3 +115,13 @@
     padding: 2rem;
   }
 }
+
+@media (max-width: 768px) {
+  .testimonials-section {
+    padding: 4.5rem 0;
+  }
+
+  .testimonials-header {
+    margin-bottom: 3rem;
+  }
+}

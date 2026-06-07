@@ -697,3 +697,71 @@
     color: transparent !important;
   }
 }
+
+/* Screen media queries for screen display only (not print) */
+@media screen and (max-width: 768px) {
+  .invoice-modal-backdrop {
+    padding: 0;
+  }
+
+  .invoice-modal-container {
+    height: 100vh;
+    border-radius: 0;
+    border: none;
+  }
+
+  .invoice-modal-toolbar {
+    padding: 0.8rem 1rem;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
+
+  .btn-toolbar-back {
+    padding: 0.35rem 0.5rem;
+  }
+
+  .toolbar-actions {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .btn-invoice-cancel,
+  .btn-invoice-print {
+    flex: 1;
+    padding: 0.65rem 0.8rem;
+    justify-content: center;
+    font-size: 0.82rem;
+  }
+
+  .invoice-sheet-scroll-wrapper {
+    padding: 1rem 0.5rem;
+  }
+
+  /* Force the sheet to keep A4 proportions for printing and look like an editable document on screen with horizontal scroll */
+  .printable-invoice-sheet {
+    min-width: 680px;
+    padding: 15mm 12mm;
+  }
+  
+  .invoice-meta-section {
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 1.5rem;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .invoice-meta-section {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .invoice-details-group {
+    justify-self: start;
+    width: 100%;
+  }
+
+  .invoice-details-table {
+    width: 100%;
+  }
+}

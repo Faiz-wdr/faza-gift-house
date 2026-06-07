@@ -100,6 +100,11 @@ export default function Navbar() {
           <span className="line"></span>
         </button>
       </div>
+      
+      {/* Mobile Menu Backdrop Overlay */}
+      {mobileMenuOpen && (
+        <div className="navbar-overlay" onClick={() => setMobileMenuOpen(false)}></div>
+      )}
     </nav>
   );
 }

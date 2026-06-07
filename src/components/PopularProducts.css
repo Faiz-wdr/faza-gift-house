@@ -201,3 +201,17 @@
     margin: 0 auto;
   }
 }
+
+@media (max-width: 768px) {
+  .products-section {
+    padding: 4.5rem 0;
+  }
+
+  .section-header {
+    margin-bottom: 3rem;
+  }
+
+  .view-all-container {
+    margin-top: 3rem;
+  }
+}

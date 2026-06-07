@@ -1248,3 +1248,72 @@
   border-color: #B91C1C !important;
   box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
 }
+
+@media (max-width: 576px) {
+  .order-modal-backdrop {
+    padding: 0;
+  }
+
+  .order-modal-card {
+    height: 100vh;
+    max-width: 100%;
+    border-radius: 0;
+    border: none;
+  }
+
+  .order-modal-header {
+    padding: 1rem 1.2rem;
+  }
+
+  .form-sections-scroller {
+    padding: 1rem;
+    gap: 1.2rem;
+  }
+
+  .form-block-card {
+    padding: 1.2rem;
+  }
+
+  .form-item-row {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+
+  .product-select-box {
+    grid-column: span 1;
+  }
+
+  .btn-remove-item-row {
+    grid-column: span 1;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+
+  .order-modal-footer {
+    padding: 0 1.2rem;
+    gap: 0.6rem;
+  }
+
+  .order-modal-footer button {
+    flex: 1;
+    padding: 0.65rem 0.8rem;
+    font-size: 0.85rem;
+    justify-content: center;
+  }
+
+  .drawer-body {
+    padding: 1.2rem;
+    gap: 1.2rem;
+  }
+
+  .drawer-status-summary {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+    padding: 1rem;
+  }
+
+  .info-list-grid {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+}

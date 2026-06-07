@@ -808,50 +808,37 @@
 /* RESPONSIVE LAYOUTS FOR SPLIT FORM */
 @media (max-width: 992px) {
   .form-modal-card {
-    max-width: 80%;
+    max-width: 92%;
     height: 95vh;
   }
   
   .form-modal-body {
     grid-template-columns: 1fr;
-    overflow-y: auto;
+    overflow: hidden; /* Prevent body itself from scrolling; only inner fields will scroll */
   }
 
   .form-left-panel {
     border-right: none;
     order: 1;
-    overflow-y: visible;
-    height: auto;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
   .form-scrollable-fields {
-    overflow-y: visible;
-    padding: 1.5rem;
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 1.8rem 1.5rem;
   }
 
   .form-right-panel {
-    order: 2;
-    background-color: #FAF9F6;
-    border-bottom: 1px solid rgba(14, 90, 60, 0.08);
-    overflow-y: visible;
-    padding: 1.8rem;
-    height: auto;
-  }
-
-  .sticky-preview-container {
-    position: relative;
-    top: 0;
-    max-width: 100%;
-    align-items: center;
-  }
-
-  .live-preview-card {
-    max-width: 320px;
+    display: none; /* Hide preview card on mobile/tablet to focus on form inputs */
   }
 
   .form-sticky-footer {
-    position: sticky;
-    bottom: 0;
+    position: relative; /* Fixed at bottom of flex container */
+    flex-shrink: 0;
     width: 100%;
     z-index: 105;
     box-shadow: 0 -4px 12px rgba(31, 27, 21, 0.05);
@@ -865,12 +852,46 @@
     border-radius: 0;
   }
 
-  .form-left-panel {
-    padding: 1.5rem 1.2rem;
+  .form-scrollable-fields {
+    padding: 1.2rem 1rem;
   }
 
   .materials-config-list {
     flex-direction: column;
     gap: 0.8rem;
+  }
+
+  .size-config-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+
+  .size-dimensions-inputs {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .matrix-pricing-table-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .matrix-table {
+    min-width: 480px;
+  }
+
+  .form-sticky-footer {
+    padding: 0 1.2rem;
+    gap: 0.6rem;
+    height: 70px;
+  }
+
+  .form-sticky-footer button {
+    flex: 1;
+    padding: 0.65rem 0.8rem;
+    font-size: 0.85rem;
+    justify-content: center;
   }
 }
