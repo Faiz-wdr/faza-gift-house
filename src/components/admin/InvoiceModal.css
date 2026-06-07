@@ -408,7 +408,8 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  padding: 0 !important; /* Override global button padding to make it a square */
+  padding: 0 !important;
+  /* Override global button padding to make it a square */
   box-sizing: border-box !important;
   transition: background-color 0.15s ease;
 }
@@ -744,7 +745,7 @@
     min-width: 680px;
     padding: 15mm 12mm;
   }
-  
+
   .invoice-meta-section {
     grid-template-columns: 1.1fr 0.9fr;
     gap: 1.5rem;
@@ -764,81 +765,83 @@
 
   .invoice-details-table {
     width: 100%;
-}
+  }
 
-/* ==========================================================================
+  /* ==========================================================================
    9. MOBILE ZOOM & EDIT STYLES
    ========================================================================== */
 
-.zoomable-section {
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  border: 1px dashed transparent;
-  border-radius: 6px;
-  cursor: pointer;
-  padding: 0.2rem;
-  margin: -0.2rem;
-}
-
-.printable-invoice-sheet {
-  transition: zoom 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-@media screen and (max-width: 768px) {
-  .zoomable-section:hover {
-    border-color: rgba(128, 8, 75, 0.2);
-    background-color: rgba(128, 8, 75, 0.01);
-  }
-
-  .zoomable-section.focused-section {
-    border-color: #80084B !important;
-    border-style: solid !important;
-    background-color: rgba(128, 8, 75, 0.03) !important;
-    box-shadow: 0 0 12px rgba(128, 8, 75, 0.1);
-    outline: none;
-    padding: 0.5rem !important;
-    margin: -0.5rem !important;
-  }
-
-  .btn-floating-zoom-out {
-    position: fixed;
-    bottom: 1.8rem;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 4000;
-    background-color: #80084B;
-    color: var(--white);
-    padding: 0.8rem 1.6rem;
-    border-radius: 9999px;
-    box-shadow: 0 10px 25px rgba(128, 8, 75, 0.35);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-    font-weight: 600;
-    border: none;
+  .zoomable-section {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border: 1px dashed transparent;
+    border-radius: 6px;
     cursor: pointer;
-    outline: none;
-    animation: slideUpFloatingBtn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    transition: transform 0.2s ease, background-color 0.2s ease;
+    padding: 0.2rem;
+    margin: -0.2rem;
   }
 
-  .btn-floating-zoom-out:hover {
-    background-color: #6a063e;
-    transform: translateX(-50%) translateY(-2px);
+  .printable-invoice-sheet {
+    transition: zoom 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
   }
 
-  .btn-floating-zoom-out:active {
-    transform: translateX(-50%) translateY(0);
-  }
-}
+  @media screen and (max-width: 768px) {
+    .zoomable-section:hover {
+      border-color: rgba(128, 8, 75, 0.2);
+      background-color: rgba(128, 8, 75, 0.01);
+    }
 
-@keyframes slideUpFloatingBtn {
-  from {
-    transform: translate(-50%, 100px);
-    opacity: 0;
+    .zoomable-section.focused-section {
+      border-color: #80084B !important;
+      border-style: solid !important;
+      background-color: rgba(128, 8, 75, 0.03) !important;
+      box-shadow: 0 0 12px rgba(128, 8, 75, 0.1);
+      outline: none;
+      padding: 0.5rem !important;
+      margin: -0.5rem !important;
+    }
+
+    .btn-floating-zoom-out {
+      position: fixed;
+      bottom: 1.8rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 4000;
+      background-color: #80084B;
+      color: var(--white);
+      padding: 0.8rem 1.6rem;
+      border-radius: 9999px;
+      box-shadow: 0 10px 25px rgba(128, 8, 75, 0.35);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      outline: none;
+      animation: slideUpFloatingBtn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+
+    .btn-floating-zoom-out:hover {
+      background-color: #6a063e;
+      transform: translateX(-50%) translateY(-2px);
+    }
+
+    .btn-floating-zoom-out:active {
+      transform: translateX(-50%) translateY(0);
+    }
   }
-  to {
-    transform: translate(-50%, 0);
-    opacity: 1;
+
+  @keyframes slideUpFloatingBtn {
+    from {
+      transform: translate(-50%, 100px);
+      opacity: 0;
+    }
+
+    to {
+      transform: translate(-50%, 0);
+      opacity: 1;
+    }
   }
 }

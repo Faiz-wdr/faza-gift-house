@@ -12,7 +12,7 @@ interface InvoiceModalProps {
 export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
   const [invoiceNo, setInvoiceNo] = useState("");
   const [invoiceDate, setInvoiceDate] = useState("");
-  
+
   // Billing details
   const [companyName, setCompanyName] = useState("");
   const [address, setAddress] = useState("");
@@ -103,7 +103,7 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
       prev.map((item, idx) => {
         if (idx !== index) return item;
         const updatedItem = { ...item, [field]: val };
-        
+
         // Auto-recalculate total if qty or price changes
         if (field === "qty" || field === "price") {
           const qty = field === "qty" ? parseInt(val) || 0 : item.qty;
@@ -152,7 +152,7 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
   return (
     <div className="invoice-modal-backdrop">
       <div className="invoice-modal-container">
-        
+
         {/* Top Floating Actions Header */}
         <header className="invoice-modal-toolbar">
           <div className="toolbar-left">
@@ -174,7 +174,7 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
         </header>
 
         {/* Scrollable Container for Invoice Sheet */}
-        <div 
+        <div
           className="invoice-sheet-scroll-wrapper"
           onClick={() => {
             if (isMobile && activeZoomSection) {
@@ -182,7 +182,7 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
             }
           }}
         >
-          <article 
+          <article
             className={`printable-invoice-sheet ${activeZoomSection ? "sheet-zoomed-in" : "sheet-zoomed-out"}`}
             onClick={(e) => {
               // Click blank area on the sheet to zoom out on mobile
@@ -193,7 +193,7 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
             }}
             style={isMobile ? { zoom: invoiceScale } as React.CSSProperties : {}}
           >
-            
+
             {/* 1. Header Details */}
             <div className="invoice-sheet-header">
               <div className="invoice-logo-block">
@@ -211,7 +211,7 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
 
             {/* 2. Billing details & Invoice Details */}
             <div className="invoice-meta-section">
-              <div 
+              <div
                 id="invoice-sec-bill-to"
                 className={`bill-to-group zoomable-section ${activeZoomSection === "bill-to" ? "focused-section" : ""}`}
                 onClick={(e) => {
@@ -248,7 +248,7 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
                 />
               </div>
 
-              <div 
+              <div
                 id="invoice-sec-details"
                 className={`invoice-details-group zoomable-section ${activeZoomSection === "details" ? "focused-section" : ""}`}
                 onClick={(e) => {
@@ -289,7 +289,7 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
             </div>
 
             {/* 3. Items Table */}
-            <div 
+            <div
               id="invoice-sec-items"
               className={`invoice-table-outer zoomable-section ${activeZoomSection === "items" ? "focused-section" : ""}`}
               onClick={(e) => {
@@ -364,7 +364,7 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
                       </td>
                     </tr>
                   ))}
-                  
+
                   {/* Empty rows to match design ledger lines */}
                   {Array.from({ length: emptyRowsCount }).map((_, idx) => (
                     <tr key={`empty-${idx}`} className="empty-row">
@@ -389,7 +389,7 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
             </div>
 
             {/* 4. Financial Calculations block */}
-            <div 
+            <div
               id="invoice-sec-financials"
               className={`invoice-financials-container zoomable-section ${activeZoomSection === "financials" ? "focused-section" : ""}`}
               onClick={(e) => {
@@ -422,9 +422,9 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
                   <span className="lbl">Balance</span>
                   <span className="val">₹{balance}</span>
                 </div>
-                
+
                 <div className="financials-divider" />
-                
+
                 <div className="financials-row due-row">
                   <span className="lbl">Total Due</span>
                   <span className="val">₹{totalDue}</span>
@@ -433,7 +433,7 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
             </div>
 
             {/* 5. Notes block */}
-            <div 
+            <div
               id="invoice-sec-notes"
               className={`invoice-note-section zoomable-section ${activeZoomSection === "notes" ? "focused-section" : ""}`}
               onClick={(e) => {
@@ -464,8 +464,8 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
 
         {/* Floating Zoom Out Button for Mobile View */}
         {isMobile && activeZoomSection && (
-          <button 
-            type="button" 
+          <button
+            type="button"
             className="btn-floating-zoom-out"
             onClick={(e) => {
               e.stopPropagation();
@@ -473,7 +473,7 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
             }}
           >
             <X size={16} />
-            <span>Done Editing (Zoom Out)</span>
+            <span>Done Editing</span>
           </button>
         )}
 
