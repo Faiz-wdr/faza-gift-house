@@ -1,7 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
+let supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
+
+// Safety check: strip any trailing slash that might cause "Invalid path specified in request URL"
+if (supabaseUrl.endsWith("/")) {
+  supabaseUrl = supabaseUrl.slice(0, -1);
+}
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn(
