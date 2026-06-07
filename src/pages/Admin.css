@@ -6,7 +6,8 @@
   display: flex;
   height: 100vh;
   width: 100vw;
-  background-color: #FAF9F6; /* Soft dashboard grey-beige */
+  background-color: #FAF9F6;
+  /* Soft dashboard grey-beige */
   position: relative;
   overflow: hidden;
 }
@@ -238,6 +239,7 @@
 .dashboard-view-wrapper {
   flex-grow: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   min-height: 0;
 }
 
@@ -249,6 +251,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 0 2.5rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .header-left {
@@ -274,10 +278,18 @@
   color: var(--primary-color);
 }
 
+.header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
 .admin-profile {
   display: flex;
   align-items: center;
   gap: 0.8rem;
+  justify-content: flex-end;
 }
 
 .admin-name {
@@ -320,7 +332,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .dashboard-content {
@@ -580,6 +594,10 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
   }
+
+  .admin-name {
+    display: none;
+  }
 }
 
 /* MOBILE LAYOUT: Sidebar becomes sliding drawer drawer */
@@ -588,7 +606,8 @@
     position: fixed;
     top: 0;
     bottom: 0;
-    left: -260px; /* Hidden offscreen on left */
+    left: -260px;
+    /* Hidden offscreen on left */
     width: 260px;
     z-index: 210;
     box-shadow: none;
@@ -639,15 +658,31 @@
   /* Hamburger trigger header */
   .hamburger-btn {
     display: flex;
+    padding: 0;
+    margin: 0;
+    align-items: center;
+    justify-content: center;
   }
 
   .admin-header {
+    height: 70px;
     padding: 0 1.5rem;
+  }
+
+  .admin-page-title {
+    font-size: 1.25rem;
+    line-height: 1.2;
+  }
+
+  .admin-name {
+    display: none;
   }
 
   .dashboard-content {
     padding: 1.5rem;
     gap: 1.8rem;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .stats-row {

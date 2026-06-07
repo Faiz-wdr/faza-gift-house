@@ -282,7 +282,7 @@ export default function AdminAdBanner() {
                       <div className="banner-meta">
                         <span>Size: <strong>{banner.size}</strong></span>
                         <span className="dot">•</span>
-                        <span>Dimensions: <strong>16:7 aspect ratio</strong></span>
+                        <span>Ratio: <strong>16:7</strong></span>
                       </div>
                     </div>
 

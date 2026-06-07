@@ -23,6 +23,45 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
   const [discount, setDiscount] = useState(0);
   const [note, setNote] = useState("");
 
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [activeZoomSection, setActiveZoomSection] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const isMobile = windowWidth <= 768;
+
+  let invoiceScale = 1;
+  if (isMobile) {
+    if (activeZoomSection) {
+      invoiceScale = 1.0;
+    } else {
+      // 680px is the min-width of the invoice sheet on mobile in CSS.
+      // We scale it down to fit the window with a tiny 24px safety margin.
+      invoiceScale = (windowWidth - 24) / 680;
+    }
+  }
+
+  const handleSectionFocus = (section: string) => {
+    if (isMobile && activeZoomSection !== section) {
+      setActiveZoomSection(section);
+    }
+  };
+
+  useEffect(() => {
+    if (activeZoomSection && isMobile) {
+      const element = document.getElementById(`invoice-sec-${activeZoomSection}`);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 180); // Slight delay for the zoom transition/layout reflow
+      }
+    }
+  }, [activeZoomSection, isMobile]);
+
   // Helper to format date as DD-MMM-YYYY (e.g. 07-JUL-2025)
   const formatDateToInvoiceStyle = (dateStr: string): string => {
     if (!dateStr) return "";
@@ -135,8 +174,25 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
         </header>
 
         {/* Scrollable Container for Invoice Sheet */}
-        <div className="invoice-sheet-scroll-wrapper">
-          <article className="printable-invoice-sheet">
+        <div 
+          className="invoice-sheet-scroll-wrapper"
+          onClick={() => {
+            if (isMobile && activeZoomSection) {
+              setActiveZoomSection(null);
+            }
+          }}
+        >
+          <article 
+            className={`printable-invoice-sheet ${activeZoomSection ? "sheet-zoomed-in" : "sheet-zoomed-out"}`}
+            onClick={(e) => {
+              // Click blank area on the sheet to zoom out on mobile
+              if (isMobile && activeZoomSection) {
+                e.stopPropagation();
+                setActiveZoomSection(null);
+              }
+            }}
+            style={isMobile ? { zoom: invoiceScale } as React.CSSProperties : {}}
+          >
             
             {/* 1. Header Details */}
             <div className="invoice-sheet-header">
@@ -155,7 +211,16 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
 
             {/* 2. Billing details & Invoice Details */}
             <div className="invoice-meta-section">
-              <div className="bill-to-group">
+              <div 
+                id="invoice-sec-bill-to"
+                className={`bill-to-group zoomable-section ${activeZoomSection === "bill-to" ? "focused-section" : ""}`}
+                onClick={(e) => {
+                  if (isMobile) {
+                    e.stopPropagation();
+                    setActiveZoomSection("bill-to");
+                  }
+                }}
+              >
                 <span className="meta-label">Bill to</span>
                 <input
                   type="text"
@@ -163,6 +228,7 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
                   placeholder="[Company Name]"
+                  onFocus={() => handleSectionFocus("bill-to")}
                 />
                 <textarea
                   className="invoice-meta-input address-input"
@@ -170,6 +236,7 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
                   onChange={(e) => setAddress(e.target.value)}
                   placeholder="[place or address]"
                   rows={2}
+                  onFocus={() => handleSectionFocus("bill-to")}
                 />
                 <input
                   type="text"
@@ -177,10 +244,20 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value)}
                   placeholder="[Mobile Number]"
+                  onFocus={() => handleSectionFocus("bill-to")}
                 />
               </div>
 
-              <div className="invoice-details-group">
+              <div 
+                id="invoice-sec-details"
+                className={`invoice-details-group zoomable-section ${activeZoomSection === "details" ? "focused-section" : ""}`}
+                onClick={(e) => {
+                  if (isMobile) {
+                    e.stopPropagation();
+                    setActiveZoomSection("details");
+                  }
+                }}
+              >
                 <span className="meta-label">Invoice Details</span>
                 <div className="invoice-details-table">
                   <div className="details-row">
@@ -192,6 +269,7 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
                       value={invoiceNo}
                       onChange={(e) => setInvoiceNo(e.target.value)}
                       placeholder="Invoice Number"
+                      onFocus={() => handleSectionFocus("details")}
                     />
                   </div>
                   <div className="details-row">
@@ -203,6 +281,7 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
                       value={invoiceDate}
                       onChange={(e) => setInvoiceDate(e.target.value)}
                       placeholder="Invoice Date"
+                      onFocus={() => handleSectionFocus("details")}
                     />
                   </div>
                 </div>
@@ -210,7 +289,16 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
             </div>
 
             {/* 3. Items Table */}
-            <div className="invoice-table-outer">
+            <div 
+              id="invoice-sec-items"
+              className={`invoice-table-outer zoomable-section ${activeZoomSection === "items" ? "focused-section" : ""}`}
+              onClick={(e) => {
+                if (isMobile) {
+                  e.stopPropagation();
+                  setActiveZoomSection("items");
+                }
+              }}
+            >
               <table className="invoice-items-table">
                 <thead>
                   <tr>
@@ -235,6 +323,7 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
                           value={item.productTitle}
                           onChange={(e) => handleItemChange(idx, "productTitle", e.target.value)}
                           placeholder="Product Title"
+                          onFocus={() => handleSectionFocus("items")}
                         />
                       </td>
                       <td className="col-qty text-center">
@@ -244,6 +333,7 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
                           value={item.qty}
                           onChange={(e) => handleItemChange(idx, "qty", parseInt(e.target.value) || 0)}
                           min="1"
+                          onFocus={() => handleSectionFocus("items")}
                         />
                       </td>
                       <td className="col-price text-center">
@@ -255,6 +345,7 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
                             value={item.price}
                             onChange={(e) => handleItemChange(idx, "price", parseFloat(e.target.value) || 0)}
                             min="0"
+                            onFocus={() => handleSectionFocus("items")}
                           />
                         </div>
                       </td>
@@ -298,7 +389,16 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
             </div>
 
             {/* 4. Financial Calculations block */}
-            <div className="invoice-financials-container">
+            <div 
+              id="invoice-sec-financials"
+              className={`invoice-financials-container zoomable-section ${activeZoomSection === "financials" ? "focused-section" : ""}`}
+              onClick={(e) => {
+                if (isMobile) {
+                  e.stopPropagation();
+                  setActiveZoomSection("financials");
+                }
+              }}
+            >
               <div className="invoice-financials-table">
                 <div className="financials-row">
                   <span className="lbl">Sub Total</span>
@@ -314,6 +414,7 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
                       value={discount}
                       onChange={(e) => setDiscount(Math.max(0, parseFloat(e.target.value) || 0))}
                       min="0"
+                      onFocus={() => handleSectionFocus("financials")}
                     />
                   </span>
                 </div>
@@ -332,7 +433,16 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
             </div>
 
             {/* 5. Notes block */}
-            <div className="invoice-note-section">
+            <div 
+              id="invoice-sec-notes"
+              className={`invoice-note-section zoomable-section ${activeZoomSection === "notes" ? "focused-section" : ""}`}
+              onClick={(e) => {
+                if (isMobile) {
+                  e.stopPropagation();
+                  setActiveZoomSection("notes");
+                }
+              }}
+            >
               <span className="note-title-lbl">Note</span>
               <textarea
                 className="invoice-note-textarea"
@@ -340,6 +450,7 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Write custom payment instructions or notes here..."
                 rows={3}
+                onFocus={() => handleSectionFocus("notes")}
               />
             </div>
 
@@ -350,6 +461,21 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
 
           </article>
         </div>
+
+        {/* Floating Zoom Out Button for Mobile View */}
+        {isMobile && activeZoomSection && (
+          <button 
+            type="button" 
+            className="btn-floating-zoom-out"
+            onClick={(e) => {
+              e.stopPropagation();
+              setActiveZoomSection(null);
+            }}
+          >
+            <X size={16} />
+            <span>Done Editing (Zoom Out)</span>
+          </button>
+        )}
 
       </div>
     </div>
