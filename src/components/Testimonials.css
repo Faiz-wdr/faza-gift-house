@@ -125,3 +125,14 @@
     margin-bottom: 3rem;
   }
 }
+
+@media (max-width: 360px) {
+  .testimonials-title {
+    font-size: clamp(1.8rem, 6vw, 2.2rem);
+  }
+
+  .testimonial-card {
+    padding: 1.5rem;
+    gap: 1rem;
+  }
+}

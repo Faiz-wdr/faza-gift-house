@@ -164,7 +164,9 @@
 
 @media (max-width: 768px) {
   .hero-section {
-    padding: 120px 0 50px 0;
+    padding: 110px 0 50px 0;
+    min-height: auto;
+    display: block;
   }
 
   .hero-container {
@@ -177,6 +179,10 @@
     align-items: center;
   }
 
+  .hero-title {
+    font-size: clamp(2rem, 6vw, 2.8rem);
+  }
+
   .hero-subtitle {
     margin-left: auto;
     margin-right: auto;
@@ -185,6 +191,8 @@
   .hero-actions {
     justify-content: center;
     width: 100%;
+    flex-wrap: wrap;
+    gap: 0.8rem;
   }
 
   .hero-slider-container {
@@ -193,7 +201,16 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 360px) {
+  .hero-title {
+    font-size: clamp(1.6rem, 8vw, 2.1rem);
+  }
+
+  .hero-subtitle {
+    font-size: 0.92rem;
+    margin-bottom: 1.8rem;
+  }
+
   .hero-actions {
     flex-direction: column;
     gap: 0.8rem;

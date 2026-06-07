@@ -216,11 +216,17 @@
   }
 }
 
-@media (max-width: 480px) {
-  .navbar-logo {
-    font-size: 1.25rem;
+@media (max-width: 360px) {
+  .navbar-container {
+    padding: 0 1rem;
   }
+
+  .navbar-logo {
+    font-size: 1.18rem;
+    gap: 0.45rem;
+  }
+
   .navbar-logo-img {
-    height: 32px;
+    height: 30px;
   }
 }
