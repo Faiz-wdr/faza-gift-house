@@ -178,11 +178,11 @@ export default function AdminAdBanner() {
             <div className="specs-list">
               <div className="spec-item">
                 <span className="spec-label">Aspect Ratio</span>
-                <span className="spec-value highlight">16 : 6.2 (Wide Banner)</span>
+                <span className="spec-value highlight">16 : 7 (Wide Banner)</span>
               </div>
               <div className="spec-item">
                 <span className="spec-label">Recommended Pixels</span>
-                <span className="spec-value">1600px width × 620px height</span>
+                <span className="spec-value">1600px width × 700px height</span>
               </div>
               <div className="spec-item">
                 <span className="spec-label">Image File Size</span>
@@ -282,7 +282,7 @@ export default function AdminAdBanner() {
                       <div className="banner-meta">
                         <span>Size: <strong>{banner.size}</strong></span>
                         <span className="dot">•</span>
-                        <span>Dimensions: <strong>16:6.2 aspect ratio</strong></span>
+                        <span>Dimensions: <strong>16:7 aspect ratio</strong></span>
                       </div>
                     </div>
 

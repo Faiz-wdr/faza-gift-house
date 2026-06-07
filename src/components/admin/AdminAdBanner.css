@@ -340,7 +340,7 @@
 .banner-thumbnail-container {
   position: relative;
   width: 140px;
-  aspect-ratio: 16 / 6.2;
+  aspect-ratio: 16 / 7;
   border-radius: 6px;
   overflow: hidden;
   border: 1px solid rgba(14, 90, 60, 0.1);
