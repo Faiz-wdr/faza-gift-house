@@ -3,6 +3,10 @@
     {
       "source": "/health",
       "destination": "/api/keep-alive"
+    },
+    {
+      "source": "/((?!api/|assets/|favicon.png|.*\\.).*)",
+      "destination": "/index.html"
     }
   ],
   "crons": [
