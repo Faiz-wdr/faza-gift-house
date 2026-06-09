@@ -59,10 +59,14 @@
   justify-content: center;
   outline: none;
   transition: var(--transition-fast);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
 }
 
 .preview-close-btn:hover {
   color: var(--primary-color);
+  background-color: var(--primary-light);
   transform: rotate(90deg);
 }
 
@@ -137,10 +141,10 @@
 
 .option-label {
   font-size: 0.78rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
 }
 
 .preview-chips-container {
@@ -157,10 +161,10 @@
   border: 1px solid rgba(14, 90, 60, 0.15);
   background-color: transparent;
   color: var(--primary-color);
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.2rem;
   border-radius: var(--btn-radius);
   cursor: pointer;
-  transition: var(--transition-fast);
+  transition: var(--transition-medium);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -169,14 +173,16 @@
 }
 
 .preview-chip:hover {
-  background-color: rgba(14, 90, 60, 0.03);
+  background-color: var(--primary-light);
   border-color: var(--primary-color);
+  transform: translateY(-1px);
 }
 
 .preview-chip.active {
   background-color: var(--primary-color);
   color: var(--white);
   border-color: var(--primary-color);
+  box-shadow: 0 4px 12px rgba(14, 90, 60, 0.2);
 }
 
 .size-name {
@@ -190,15 +196,15 @@
 }
 
 .preview-chip.active .size-dims {
-  color: rgba(245, 241, 234, 0.8);
+  color: rgba(255, 255, 255, 0.75);
 }
 
 /* Dynamic Pricing Container */
 .preview-price-summary {
-  background-color: #FAF8F5;
-  border-radius: 8px;
-  padding: 1.2rem 1.5rem;
-  border: 1px solid rgba(14, 90, 60, 0.05);
+  background-color: rgba(14, 90, 60, 0.02);
+  border-radius: 12px;
+  padding: 1.2rem 1.6rem;
+  border: 1px solid rgba(14, 90, 60, 0.06);
 }
 
 .price-label-row {
@@ -219,6 +225,13 @@
 
 .preview-order-btn {
   margin-top: 0.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  transition: var(--transition-medium);
+}
+
+.preview-order-btn:hover {
+  box-shadow: 0 8px 25px rgba(14, 90, 60, 0.25);
+  transform: translateY(-2px);
 }
 
 /* RESPONSIVE LAYOUTS */

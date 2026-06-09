@@ -55,14 +55,14 @@
   border: 1px solid var(--border-color-light);
   display: flex;
   flex-direction: column;
-  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease;
   will-change: transform, box-shadow;
 }
 
 .admin-product-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-6px);
   box-shadow: var(--shadow-hover);
-  border-color: rgba(14, 90, 60, 0.08);
+  border-color: rgba(14, 90, 60, 0.15);
 }
 
 .admin-card-image-box {
@@ -174,8 +174,8 @@
 }
 
 .price-preview-value {
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-size: 1.25rem;
+  font-weight: 800;
   color: var(--primary-color);
   line-height: 1.1;
 }
@@ -195,10 +195,10 @@
   justify-content: center;
   gap: 0.35rem;
   font-size: 0.72rem;
-  font-weight: 600;
-  padding: 0.5rem 0.2rem;
+  font-weight: 700;
+  padding: 0.6rem 0.2rem;
   border-radius: var(--btn-radius);
-  border: 1px solid rgba(14, 90, 60, 0.15);
+  border: 1px solid rgba(14, 90, 60, 0.12);
   background-color: transparent;
   cursor: pointer;
   transition: var(--transition-fast);
@@ -216,6 +216,7 @@
 .preview-btn:hover {
   background-color: var(--primary-light);
   border-color: var(--primary-color);
+  transform: translateY(-1px);
 }
 
 .edit-btn {
@@ -225,6 +226,7 @@
 .edit-btn:hover {
   background-color: #EFF6FF;
   border-color: #2563EB;
+  transform: translateY(-1px);
 }
 
 .delete-btn {
@@ -234,6 +236,7 @@
 .delete-btn:hover {
   background-color: #FFF5F5;
   border-color: #DC2626;
+  transform: translateY(-1px);
 }
 
 /* Responsive Grid Adaptation */

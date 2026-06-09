@@ -52,36 +52,36 @@
 }
 
 .bulk-title {
-  color: var(--bg-color);
+  color: var(--white);
   font-size: clamp(1.8rem, 3.5vw, 2.6rem);
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.25;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
 }
 
 .bulk-text {
-  color: rgba(245, 241, 234, 0.8);
+  color: rgba(255, 255, 255, 0.9);
   font-size: clamp(0.95rem, 1.2vw, 1.1rem);
   line-height: 1.7;
   max-width: 580px;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 /* WhatsApp CTA Button */
 .btn-whatsapp {
-  background-color: var(--white);
-  color: var(--primary-color);
-  font-weight: 600;
+  background-color: var(--accent-color);
+  color: var(--text-dark);
+  font-weight: 700;
   font-size: 0.95rem;
-  padding: 0.9rem 2.2rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  padding: 0.95rem 2.4rem;
+  box-shadow: 0 4px 15px rgba(230, 179, 37, 0.2);
 }
 
 .btn-whatsapp:hover {
-  background-color: var(--bg-color);
-  color: var(--primary-hover);
+  background-color: var(--accent-hover);
+  color: var(--text-dark);
   transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 10px 25px rgba(14, 90, 60, 0.25);
+  box-shadow: 0 10px 25px rgba(230, 179, 37, 0.4);
 }
 
 .btn-whatsapp:active {

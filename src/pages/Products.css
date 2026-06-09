@@ -294,27 +294,6 @@
 }
 
 /* Card Additions (Quick View & Button) */
-.card-quick-view {
-  position: absolute;
-  bottom: -45px;
-  left: 0;
-  right: 0;
-  padding: 0.8rem 1rem;
-  background-color: rgba(14, 90, 60, 0.92);
-  color: var(--white);
-  font-size: 0.82rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  backdrop-filter: blur(4px);
-}
-
-.product-image-container:hover .card-quick-view {
-  bottom: 0;
-}
 
 .price-pill.highlight {
   background-color: var(--primary-light);

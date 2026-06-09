@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, EffectFade } from "swiper/modules";
-import { SlidersHorizontal, X, ArrowRight, MessageCircle } from "lucide-react";
+import { SlidersHorizontal, X, ArrowRight } from "lucide-react";
 import type { Product } from "../data/productsData";
 import BulkCTA from "../components/BulkCTA";
 import { getSizeLabel, getMaterialPrice } from "../components/PopularProducts";
@@ -141,10 +141,6 @@ Est. Price: *₹${priceVal}*`;
       <div className="product-card reveal-element">
         <div className="product-image-container" onClick={handleOrderClick} style={{ cursor: "pointer" }}>
           <img src={product.image} alt={product.title} className="product-card-image" />
-          <div className="card-quick-view">
-            <span>Order on WhatsApp</span>
-            <MessageCircle size={16} />
-          </div>
         </div>
         <div className="product-details">
           <h3 className="product-title" onClick={handleOrderClick} style={{ cursor: "pointer" }}>{product.title}</h3>
