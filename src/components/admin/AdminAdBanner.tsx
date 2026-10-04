@@ -157,7 +157,6 @@ export default function AdminAdBanner() {
       <div className="banner-page-header">
         <div>
           <h2>Ad Banner Settings</h2>
-          <p className="page-desc">Manage the hero advertisement banners displayed at the top of the products catalog page.</p>
         </div>
         {banners.length > 0 && (
           <button className="btn-restore-defaults" onClick={handleRestoreDefaults}>

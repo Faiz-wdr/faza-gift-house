@@ -10,6 +10,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
 import SmoothScroll from "./components/SmoothScroll";
 import useScrollReveal from "./hooks/useScrollReveal";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 import "./App.css";
 
@@ -63,11 +64,13 @@ function AppContent() {
 
 function App() {
   return (
-    <Router>
-      <SmoothScroll>
-        <AppContent />
-      </SmoothScroll>
-    </Router>
+    <ErrorBoundary fallbackTitle="Application encountered an error">
+      <Router>
+        <SmoothScroll>
+          <AppContent />
+        </SmoothScroll>
+      </Router>
+    </ErrorBoundary>
   );
 }
 

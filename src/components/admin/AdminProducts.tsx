@@ -265,7 +265,6 @@ export default function AdminProducts({
       >
         <div className="header-text">
           <h3>Catalog Management</h3>
-          <p>Showing {products.length} catalog items</p>
         </div>
         
         <div className="products-actions-group">

@@ -1,27 +1,34 @@
 import { motion } from "framer-motion";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Pagination, EffectFade } from "swiper/modules";
-
-// Swiper CSS
-import "swiper/css";
-import "swiper/css/pagination";
-import "swiper/css/effect-fade";
-
 import "./Hero.css";
 
-// Product images generated previously
-const heroImages = [
+const heroCards = [
   {
+    id: 1,
+    title: "Crystal Faceted Award",
+    src: "/memento_crystal.png",
+    rotation: -7,
+    yOffset: 6,
+  },
+  {
+    id: 2,
+    title: "Classic Arch Memento",
     src: "/memento_orange.png",
-    alt: "Orange Custom Prize Memento",
+    rotation: -2.5,
+    yOffset: -6,
   },
   {
+    id: 3,
+    title: "Foliage Quill Award",
     src: "/memento_green.png",
-    alt: "Green Custom Prize Memento",
+    rotation: 2.5,
+    yOffset: -6,
   },
   {
+    id: 4,
+    title: "Sunset Crest Shield",
     src: "/memento_purple.png",
-    alt: "Purple Custom Prize Memento",
+    rotation: 7,
+    yOffset: 6,
   },
 ];
 
@@ -31,19 +38,19 @@ export default function Hero() {
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.2,
+        staggerChildren: 0.12,
+        delayChildren: 0.15,
       },
     },
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
+    hidden: { opacity: 0, y: 25 },
     show: { 
       opacity: 1, 
       y: 0, 
       transition: { 
-        duration: 0.85, 
+        duration: 0.8, 
         ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
       } 
     },
@@ -59,70 +66,80 @@ export default function Hero() {
   return (
     <header id="home" className="hero-section">
       <div className="container hero-container">
-        {/* Left side content */}
         <motion.div 
-          className="hero-content"
+          className="hero-content-centered"
           variants={containerVariants}
           initial="hidden"
           animate="show"
         >
+          {/* Centered Main Title */}
           <motion.h1 className="hero-title" variants={itemVariants}>
-            Custom Mementos Made for Your <span>Special Moments</span>
+            A place to celebrate your <br className="hero-title-br" />
+            <span className="hero-highlight">masterpiece.</span>
           </motion.h1>
-          
-          <motion.p className="hero-subtitle" variants={itemVariants}>
-            Personalized gifts handcrafted to preserve your most cherished memories. 
-            From organic wood to polished acrylic.
-          </motion.p>
 
+          {/* CTA Buttons after Hero heading */}
           <motion.div className="hero-actions" variants={itemVariants}>
             <button 
-              className="btn btn-primary"
+              className="btn-hero-primary"
               onClick={() => handleScrollToSection("products")}
               id="hero-browse-products-btn"
             >
-              Browse Products
+              Explore Catalog
             </button>
             <button 
-              className="btn btn-secondary"
+              className="btn-hero-secondary"
               onClick={() => handleScrollToSection("contact")}
               id="hero-contact-us-btn"
             >
-              Contact Us
+              Get a Quote
             </button>
           </motion.div>
-        </motion.div>
 
-        {/* Right side slider */}
-        <div className="hero-slider-container">
-          <Swiper
-            modules={[Autoplay, Pagination, EffectFade]}
-            effect="fade"
-            fadeEffect={{ crossFade: true }}
-            spaceBetween={0}
-            slidesPerView={1}
-            autoplay={{
-              delay: 3500,
-              disableOnInteraction: false,
-            }}
-            pagination={{
-              clickable: true,
-              el: ".hero-custom-pagination",
-            }}
-            loop={true}
-            className="hero-swiper"
-          >
-            {heroImages.map((img, idx) => (
-              <SwiperSlide key={idx} className="hero-slide">
-                <div className="hero-image-wrapper">
-                  <img src={img.src} alt={img.alt} className="hero-slide-image" />
-                </div>
-              </SwiperSlide>
-            ))}
-          </Swiper>
-          {/* Custom dots wrapper matching design */}
-          <div className="hero-custom-pagination"></div>
-        </div>
+          {/* 4 Cards Showcase in Center */}
+          <motion.div className="hero-cards-wrapper" variants={itemVariants}>
+            <div className="hero-cards-deck">
+              {heroCards.map((card, idx) => (
+                <motion.div
+                  key={card.id}
+                  className={`hero-fanned-card card-${idx + 1}`}
+                  initial={{ opacity: 0, y: 35, rotate: 0 }}
+                  animate={{ opacity: 1, y: card.yOffset, rotate: card.rotation }}
+                  transition={{ 
+                    duration: 0.75, 
+                    delay: 0.15 + idx * 0.08, 
+                    ease: [0.16, 1, 0.3, 1] 
+                  }}
+                  whileHover={{
+                    y: -16,
+                    rotate: 0,
+                    scale: 1.06,
+                    zIndex: 25,
+                    transition: { duration: 0.25, ease: "easeOut" }
+                  }}
+                  onClick={() => handleScrollToSection("products")}
+                  title={card.title}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      handleScrollToSection("products");
+                    }
+                  }}
+                >
+                  <div className="card-image-frame">
+                    <img 
+                      src={card.src} 
+                      alt={card.title} 
+                      className="card-media-img" 
+                      loading={idx === 0 ? "eager" : "lazy"}
+                    />
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </motion.div>
       </div>
     </header>
   );

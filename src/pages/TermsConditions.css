@@ -28,7 +28,7 @@
   padding: 0.35rem 0.8rem;
   border-radius: 30px;
   margin-bottom: 1.2rem;
-  box-shadow: 0 2px 8px rgba(14, 90, 60, 0.03);
+  box-shadow: 0 2px 8px rgba(125, 4, 75, 0.03);
 }
 
 .terms-title {
@@ -247,16 +247,16 @@
 
 /* 3. CONTACT BOX SECTION */
 .contact-terms-section {
-  border: 1px solid rgba(14, 90, 60, 0.08) !important;
+  border: 1px solid rgba(125, 4, 75, 0.08) !important;
 }
 
 .terms-contact-card {
-  background-color: rgba(14, 90, 60, 0.03); /* Soft elegant green-tinted background */
+  background-color: rgba(125, 4, 75, 0.03); /* Soft elegant berry-tinted background */
   border-radius: 12px;
   padding: 2rem;
-  border: 1px solid rgba(14, 90, 60, 0.06);
+  border: 1px solid rgba(125, 4, 75, 0.06);
   margin-top: 1.8rem;
-  box-shadow: inset 0 2px 4px rgba(14, 90, 60, 0.01);
+  box-shadow: inset 0 2px 4px rgba(125, 4, 75, 0.01);
 }
 
 .terms-contact-brand {
@@ -291,7 +291,7 @@
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
-  color: rgba(14, 90, 60, 0.5);
+  color: rgba(125, 4, 75, 0.5);
   letter-spacing: 0.06em;
   margin-bottom: 0.25rem;
 }

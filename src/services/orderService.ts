@@ -6,18 +6,6 @@ export const orderService = {
    * Fetches all orders with joined customers and order item products
    */
   async getOrders(): Promise<Order[]> {
-    if (typeof window !== "undefined" && localStorage.getItem("faza_local_session")) {
-      const stored = localStorage.getItem("faza_local_orders");
-      if (stored) {
-        try {
-          return JSON.parse(stored);
-        } catch (e) {
-          // ignore
-        }
-      }
-      return [];
-    }
-
     try {
       const { data: dbOrders, error } = await supabase
         .from("orders")
@@ -40,54 +28,63 @@ export const orderService = {
 
         const items: OrderItem[] = dbItems.map((item: any) => {
           const prod = item.products || { product_id: "", name: "", image_url: "" };
+          const unitPrice = item.unit_price != null ? parseFloat(String(item.unit_price)) : 0;
+          const totalPrice = item.total_price != null ? parseFloat(String(item.total_price)) : 0;
           return {
             productId: prod.product_id,
             productTitle: prod.name,
             productImage: prod.image_url || "/placeholder.png",
             size: item.size_name,
             material: item.material,
-            qty: item.quantity,
-            price: parseFloat(item.unit_price.toString()),
-            total: parseFloat(item.total_price.toString())
+            qty: Number(item.quantity) || 1,
+            price: isNaN(unitPrice) ? 0 : unitPrice,
+            total: isNaN(totalPrice) ? 0 : totalPrice
           };
         });
 
         const subtotal = items.reduce((sum, item) => sum + item.total, 0);
-        const grandTotal = parseFloat(o.total_amount.toString());
+        const rawTotal = o.total_amount != null ? parseFloat(String(o.total_amount)) : 0;
+        const grandTotal = isNaN(rawTotal) ? subtotal : rawTotal;
         const additionalCharges = Math.max(0, grandTotal - subtotal);
 
+        let orderDateStr = new Date().toISOString().split("T")[0];
+        if (o.created_at) {
+          try {
+            const parsed = new Date(o.created_at);
+            if (!isNaN(parsed.getTime())) {
+              orderDateStr = parsed.toISOString().split("T")[0];
+            }
+          } catch {
+            // Keep default
+          }
+        }
+
+        const rawPaid = o.paid_amount != null ? parseFloat(String(o.paid_amount)) : 0;
+        const rawPending = o.pending_amount != null ? parseFloat(String(o.pending_amount)) : 0;
+
         return {
-          id: o.order_id,
+          id: o.order_id || String(o.id || "ORD"),
           dbUuid: o.id,
-          customerName: customer.name,
+          customerName: customer.name || "Customer",
           customerPhone: customer.phone || "",
           customerAddress: customer.address || "",
-          orderDate: new Date(o.created_at).toISOString().split("T")[0],
+          orderDate: orderDateStr,
           deliveryDate: o.delivery_date || undefined,
-          status: o.status as "Delivered" | "Pending" | "In Progress",
-          payment: o.payment_status as "Paid" | "Pending" | "Partial",
+          status: (o.status || "Pending") as "Delivered" | "Pending" | "In Progress",
+          payment: (o.payment_status || "Pending") as "Paid" | "Pending" | "Partial",
           trackingId: o.tracking_id || "",
           items,
           subtotal,
           additionalCharges,
           grandTotal,
-          paidAmount: parseFloat(o.paid_amount.toString()),
-          pendingAmount: parseFloat(o.pending_amount.toString())
+          paidAmount: isNaN(rawPaid) ? 0 : rawPaid,
+          pendingAmount: isNaN(rawPending) ? 0 : rawPending
         };
       });
 
-      localStorage.setItem("faza_local_orders", JSON.stringify(list));
       return list;
     } catch (dbError) {
-      console.warn("Supabase fetch orders failed, checking local cache fallback:", dbError);
-      const stored = localStorage.getItem("faza_local_orders");
-      if (stored) {
-        try {
-          return JSON.parse(stored);
-        } catch (e) {
-          // ignore
-        }
-      }
+      console.error("Supabase fetch orders failed:", dbError);
       return [];
     }
   },
@@ -96,26 +93,6 @@ export const orderService = {
    * Saves an order, including customer upsert and bulk insertion of line items
    */
   async saveOrder(order: Order): Promise<void> {
-    if (typeof window !== "undefined" && localStorage.getItem("faza_local_session")) {
-      const stored = localStorage.getItem("faza_local_orders");
-      let list: Order[] = [];
-      if (stored) {
-        try {
-          list = JSON.parse(stored);
-        } catch (e) {
-          // ignore
-        }
-      }
-      const idx = list.findIndex((o) => o.id === order.id);
-      if (idx !== -1) {
-        list[idx] = order;
-      } else {
-        list.push(order);
-      }
-      localStorage.setItem("faza_local_orders", JSON.stringify(list));
-      return;
-    }
-
     // 1. Upsert customer profile
     let customerIdUuid: string;
     const { data: existingCustomer } = await supabase
@@ -232,21 +209,6 @@ export const orderService = {
    * Deletes an order and cascades automatically to line items
    */
   async deleteOrder(orderIdCode: string): Promise<void> {
-    if (typeof window !== "undefined" && localStorage.getItem("faza_local_session")) {
-      const stored = localStorage.getItem("faza_local_orders");
-      let list: Order[] = [];
-      if (stored) {
-        try {
-          list = JSON.parse(stored);
-        } catch (e) {
-          // ignore
-        }
-      }
-      list = list.filter((o) => o.id !== orderIdCode);
-      localStorage.setItem("faza_local_orders", JSON.stringify(list));
-      return;
-    }
-
     const { data: order, error: findError } = await supabase
       .from("orders")
       .select("id")
@@ -263,5 +225,135 @@ export const orderService = {
       .eq("id", order.id);
 
     if (deleteError) throw deleteError;
+  },
+
+  /**
+   * Fetches all registered customer profiles
+   */
+  async getCustomers(): Promise<CustomerProfile[]> {
+    try {
+      const { data, error } = await supabase
+        .from("customers")
+        .select("name, phone, address")
+        .order("name", { ascending: true });
+
+      if (error) throw error;
+      return (data || []).map((c: any) => ({
+        name: c.name || "",
+        phone: c.phone || "",
+        address: c.address || ""
+      }));
+    } catch (dbError) {
+      console.error("Supabase fetch customers failed:", dbError);
+      return [];
+    }
+  },
+
+  /**
+   * Upserts a customer profile record
+   */
+  async saveCustomer(customer: CustomerProfile): Promise<void> {
+    if (!customer.name.trim()) return;
+    try {
+      const { data: existing } = await supabase
+        .from("customers")
+        .select("id")
+        .eq("name", customer.name.trim())
+        .maybeSingle();
+
+      if (existing) {
+        await supabase
+          .from("customers")
+          .update({
+            phone: customer.phone,
+            address: customer.address
+          })
+          .eq("id", existing.id);
+      } else {
+        await supabase
+          .from("customers")
+          .insert({
+            name: customer.name.trim(),
+            phone: customer.phone,
+            address: customer.address
+          });
+      }
+    } catch (e) {
+      console.error("Supabase saveCustomer error:", e);
+    }
+  },
+
+  /**
+   * Deletes a customer profile record
+   */
+  async deleteCustomer(customerName: string): Promise<void> {
+    if (!customerName.trim()) return;
+    try {
+      await supabase
+        .from("customers")
+        .delete()
+        .eq("name", customerName.trim());
+    } catch (e) {
+      console.error("Supabase deleteCustomer error:", e);
+    }
   }
 };
+
+export interface CustomerProfile {
+  name: string;
+  phone: string;
+  address: string;
+}
+
+const LOCAL_STORAGE_CUSTOMERS_KEY = "faza_saved_customers";
+
+export function getCachedCustomers(): CustomerProfile[] {
+  try {
+    const raw = localStorage.getItem(LOCAL_STORAGE_CUSTOMERS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveCachedCustomer(customer: CustomerProfile) {
+  if (!customer.name.trim()) return;
+  try {
+    const current = getCachedCustomers();
+    const existingIndex = current.findIndex(
+      (c) =>
+        c.name.trim().toLowerCase() === customer.name.trim().toLowerCase() ||
+        (customer.phone && c.phone && c.phone.trim() === customer.phone.trim())
+    );
+    if (existingIndex >= 0) {
+      current[existingIndex] = {
+        name: customer.name.trim(),
+        phone: customer.phone ? customer.phone.trim() : current[existingIndex].phone,
+        address: customer.address ? customer.address.trim() : current[existingIndex].address,
+      };
+    } else {
+      current.push({
+        name: customer.name.trim(),
+        phone: customer.phone.trim(),
+        address: customer.address.trim(),
+      });
+    }
+    localStorage.setItem(LOCAL_STORAGE_CUSTOMERS_KEY, JSON.stringify(current));
+  } catch (e) {
+    console.error("Failed to save customer cache:", e);
+  }
+}
+
+export function deleteCachedCustomer(customerName: string) {
+  if (!customerName.trim()) return;
+  try {
+    const current = getCachedCustomers();
+    const updated = current.filter(
+      (c) => c.name.trim().toLowerCase() !== customerName.trim().toLowerCase()
+    );
+    localStorage.setItem(LOCAL_STORAGE_CUSTOMERS_KEY, JSON.stringify(updated));
+  } catch (e) {
+    console.error("Failed to delete customer from cache:", e);
+  }
+}
+

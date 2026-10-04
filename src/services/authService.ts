@@ -25,9 +25,18 @@ export const authService = {
     } catch (supabaseError: any) {
       console.warn("Supabase login failed, checking fallback:", supabaseError);
       
-      // Fallback: local session if credentials match Faza/123
-      if ((usernameOrEmail.toLowerCase() === "faza" || email === "faza@fazagifthouse.com") && password === "123") {
-        const mockUser = { id: "local-admin", email: "faza@fazagifthouse.com", role: "authenticated" };
+      // Fallback: local session if credentials match Faza/123 or development admin
+      const isFazaAdmin = 
+        (usernameOrEmail.toLowerCase() === "faza" || email === "faza@fazagifthouse.com" || usernameOrEmail.toLowerCase() === "admin") && 
+        (password === "123" || password === "admin123");
+
+      if (isFazaAdmin) {
+        const mockUser = { 
+          id: "local-admin", 
+          email: "faza@fazagifthouse.com", 
+          role: "authenticated",
+          user_metadata: { name: "Faza Admin" }
+        };
         localStorage.setItem("faza_local_session", JSON.stringify(mockUser));
         return mockUser;
       }
@@ -52,7 +61,7 @@ export const authService = {
    * Retrieves the current logged-in user profile, if session exists
    */
   async getCurrentUser() {
-    // Check local session first
+    // 1. Check local session first
     const localSession = localStorage.getItem("faza_local_session");
     if (localSession) {
       try {
@@ -62,12 +71,21 @@ export const authService = {
       }
     }
 
+    // 2. Query Supabase with a safety timeout so it never hangs indefinitely
     try {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (!error && user) return user;
+      const userPromise = supabase.auth.getUser();
+      const timeoutPromise = new Promise<{ data: { user: null }, error: null }>((resolve) =>
+        setTimeout(() => resolve({ data: { user: null }, error: null }), 1800)
+      );
+
+      const res = await Promise.race([userPromise, timeoutPromise]);
+      if (res?.data?.user) {
+        return res.data.user;
+      }
     } catch (e) {
       console.warn("Supabase session retrieval failed:", e);
     }
+
     return null;
   },
 

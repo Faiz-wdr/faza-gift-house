@@ -56,9 +56,9 @@
   bottom: 0;
   background: linear-gradient(
     to top,
-    rgba(14, 90, 60, 0.85) 0%,
-    rgba(31, 27, 21, 0.35) 60%,
-    rgba(31, 27, 21, 0.15) 100%
+    rgba(125, 4, 75, 0.88) 0%,
+    rgba(20, 20, 20, 0.4) 60%,
+    rgba(20, 20, 20, 0.15) 100%
   );
   display: flex;
   align-items: flex-end;
@@ -128,7 +128,7 @@
   justify-content: space-between;
   align-items: flex-end;
   margin-bottom: 3.5rem;
-  border-bottom: 1px solid rgba(14, 90, 60, 0.08);
+  border-bottom: 1px solid rgba(125, 4, 75, 0.08);
   padding-bottom: 1.8rem;
 }
 
@@ -164,7 +164,7 @@
   color: var(--primary-color);
   background-color: var(--white);
   padding: 0.75rem 2.5rem 0.75rem 1.2rem;
-  border: 1px solid rgba(14, 90, 60, 0.15);
+  border: 1px solid rgba(20, 20, 20, 0.12);
   border-radius: var(--radius-sm);
   cursor: pointer;
   outline: none;
@@ -177,7 +177,7 @@
 
 .sort-select:hover {
   border-color: var(--primary-color);
-  box-shadow: 0 4px 12px rgba(14, 90, 60, 0.08);
+  box-shadow: 0 4px 12px rgba(125, 4, 75, 0.1);
 }
 
 .sort-wrapper::after {
@@ -201,7 +201,7 @@
   color: var(--primary-color);
   background-color: var(--white);
   padding: 0.75rem 1.2rem;
-  border: 1px solid rgba(14, 90, 60, 0.15);
+  border: 1px solid rgba(20, 20, 20, 0.12);
   border-radius: var(--radius-sm);
   cursor: pointer;
   box-shadow: var(--shadow-sm);
@@ -240,7 +240,7 @@
   font-size: 1.15rem;
   font-weight: 700;
   color: var(--primary-color);
-  border-bottom: 1.5px solid rgba(14, 90, 60, 0.08);
+  border-bottom: 1.5px solid rgba(125, 4, 75, 0.08);
   padding-bottom: 0.6rem;
 }
 
@@ -268,7 +268,7 @@
 
 .filter-btn:hover {
   color: var(--primary-color);
-  background-color: rgba(14, 90, 60, 0.03);
+  background-color: rgba(125, 4, 75, 0.04);
 }
 
 .filter-btn.active {
@@ -420,7 +420,7 @@
 
 .drawer-header {
   padding: 1.5rem;
-  border-bottom: 1px solid rgba(14, 90, 60, 0.08);
+  border-bottom: 1px solid rgba(20, 20, 20, 0.06);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -468,7 +468,7 @@
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--primary-color);
-  border-bottom: 1px solid rgba(14, 90, 60, 0.06);
+  border-bottom: 1px solid rgba(20, 20, 20, 0.06);
   padding-bottom: 0.4rem;
 }
 
@@ -484,7 +484,7 @@
   font-weight: 500;
   text-align: left;
   padding: 0.6rem 0.8rem;
-  border: 1px solid rgba(14, 90, 60, 0.12);
+  border: 1px solid rgba(20, 20, 20, 0.1);
   border-radius: 6px;
   background-color: var(--white);
   color: var(--text-muted);
@@ -502,7 +502,7 @@
 
 .drawer-footer {
   padding: 1.5rem;
-  border-top: 1px solid rgba(14, 90, 60, 0.08);
+  border-top: 1px solid rgba(20, 20, 20, 0.06);
 }
 
 .w-100 {

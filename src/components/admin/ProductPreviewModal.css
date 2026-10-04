@@ -35,7 +35,7 @@
 
 .preview-modal-header {
   padding: 1.2rem 1.8rem;
-  border-bottom: 1px solid rgba(14, 90, 60, 0.08);
+  border-bottom: 1px solid rgba(125, 4, 75, 0.08);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -43,10 +43,10 @@
 }
 
 .preview-modal-header h3 {
-  font-family: var(--font-heading);
-  color: var(--primary-color);
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-family: var(--font-body);
+  color: var(--text-dark);
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
 .preview-close-btn {
@@ -85,7 +85,7 @@
   border-radius: var(--radius-md);
   overflow: hidden;
   background-color: #ECE7DF;
-  border: 1px solid rgba(14, 90, 60, 0.05);
+  border: 1px solid rgba(125, 4, 75, 0.05);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -113,10 +113,10 @@
 }
 
 .preview-title {
-  font-family: var(--font-heading);
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: var(--primary-color);
+  font-family: var(--font-body);
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--text-dark);
   line-height: 1.25;
 }
 
@@ -158,7 +158,7 @@
   font-family: var(--font-body);
   font-size: 0.85rem;
   font-weight: 500;
-  border: 1px solid rgba(14, 90, 60, 0.15);
+  border: 1px solid rgba(125, 4, 75, 0.15);
   background-color: transparent;
   color: var(--primary-color);
   padding: 0.6rem 1.2rem;
@@ -182,7 +182,7 @@
   background-color: var(--primary-color);
   color: var(--white);
   border-color: var(--primary-color);
-  box-shadow: 0 4px 12px rgba(14, 90, 60, 0.2);
+  box-shadow: 0 4px 12px rgba(125, 4, 75, 0.2);
 }
 
 .size-name {
@@ -201,10 +201,10 @@
 
 /* Dynamic Pricing Container */
 .preview-price-summary {
-  background-color: rgba(14, 90, 60, 0.02);
+  background-color: rgba(125, 4, 75, 0.02);
   border-radius: 12px;
   padding: 1.2rem 1.6rem;
-  border: 1px solid rgba(14, 90, 60, 0.06);
+  border: 1px solid rgba(125, 4, 75, 0.06);
 }
 
 .price-label-row {
@@ -230,7 +230,7 @@
 }
 
 .preview-order-btn:hover {
-  box-shadow: 0 8px 25px rgba(14, 90, 60, 0.25);
+  box-shadow: 0 8px 25px rgba(125, 4, 75, 0.25);
   transform: translateY(-2px);
 }
 

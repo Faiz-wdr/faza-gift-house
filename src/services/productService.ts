@@ -56,36 +56,7 @@ export const productService = {
   /**
    * Fetches all products and joins related sizes, materials, and pricing data
    */
-  async getProducts(options?: { forPublic?: boolean }): Promise<AdminProduct[]> {
-    const forPublic = options?.forPublic ?? false;
-    const hasLocalSession = typeof window !== "undefined" && localStorage.getItem("faza_local_session");
-    const isSupabaseUnconfigured = !import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY === "your-anon-key-here";
-
-    // 1. If in local session mode (admin) AND not a public-facing request, load from local storage
-    //    Public-facing pages always try Supabase first to show real data
-    if ((hasLocalSession && !forPublic) || isSupabaseUnconfigured) {
-      if (typeof window !== "undefined") {
-        const stored = localStorage.getItem("faza_local_products");
-        if (stored) {
-          try {
-            const parsed = JSON.parse(stored);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              return parsed;
-            }
-          } catch (e) {
-            // ignore
-          }
-        }
-      }
-      
-      // Fallback: load mock products
-      const initial = initializeAdminProductsFromMock();
-      if (typeof window !== "undefined") {
-        localStorage.setItem("faza_local_products", JSON.stringify(initial));
-      }
-      return initial;
-    }
-
+  async getProducts(_options?: { forPublic?: boolean }): Promise<AdminProduct[]> {
     try {
       const [prodsRes, sizesRes, matsRes, pricesRes] = await Promise.all([
         supabase.from("products").select("*").order("created_at", { ascending: true }),
@@ -178,44 +149,14 @@ export const productService = {
         };
       });
 
-      // Backup to localStorage and return if we fetched actual records
       if (list.length > 0) {
-        localStorage.setItem("faza_local_products", JSON.stringify(list));
         return list;
       }
 
-      // If database was successfully queried but had 0 products, try to load cached local products
-      if (typeof window !== "undefined") {
-        const stored = localStorage.getItem("faza_local_products");
-        if (stored) {
-          try {
-            const parsed = JSON.parse(stored);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              return parsed;
-            }
-          } catch (e) {
-            // ignore
-          }
-        }
-      }
-
-      // Fallback to initial mock products if everything is empty
+      // Fallback to initial mock products if database is empty
       return initializeAdminProductsFromMock();
     } catch (dbError) {
-      console.warn("Supabase fetch products failed, checking local cache fallback:", dbError);
-      if (typeof window !== "undefined") {
-        const stored = localStorage.getItem("faza_local_products");
-        if (stored) {
-          try {
-            const parsed = JSON.parse(stored);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              return parsed;
-            }
-          } catch (e) {
-            // ignore
-          }
-        }
-      }
+      console.warn("Supabase fetch products failed, using mock products fallback:", dbError);
       return initializeAdminProductsFromMock();
     }
   },
@@ -224,26 +165,6 @@ export const productService = {
    * Saves a product (Add/Edit) upserting product info and configuration matrices
    */
   async saveProduct(adminProd: AdminProduct): Promise<void> {
-    if (typeof window !== "undefined" && localStorage.getItem("faza_local_session")) {
-      const stored = localStorage.getItem("faza_local_products");
-      let list: AdminProduct[] = [];
-      if (stored) {
-        try {
-          list = JSON.parse(stored);
-        } catch (e) {
-          // ignore
-        }
-      }
-      const idx = list.findIndex((p) => p.id === adminProd.id);
-      if (idx !== -1) {
-        list[idx] = adminProd;
-      } else {
-        list.push(adminProd);
-      }
-      localStorage.setItem("faza_local_products", JSON.stringify(list));
-      return;
-    }
-
     // 1. Check if product already exists by product_id
     const { data: existingProduct } = await supabase
       .from("products")
@@ -363,21 +284,6 @@ export const productService = {
    * Deletes a product from the database and cleans up its storage binary
    */
   async deleteProduct(productIdCode: string): Promise<void> {
-    if (typeof window !== "undefined" && localStorage.getItem("faza_local_session")) {
-      const stored = localStorage.getItem("faza_local_products");
-      let list: AdminProduct[] = [];
-      if (stored) {
-        try {
-          list = JSON.parse(stored);
-        } catch (e) {
-          // ignore
-        }
-      }
-      list = list.filter((p) => p.id !== productIdCode);
-      localStorage.setItem("faza_local_products", JSON.stringify(list));
-      return;
-    }
-
     const { data: product, error: findError } = await supabase
       .from("products")
       .select("id, image_url")

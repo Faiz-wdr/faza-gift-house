@@ -4,22 +4,23 @@
 
    :root {
     /* Colors */
-    --bg-color: #F5F1EA;
-    --primary-color: #0E5A3C;
-    --primary-hover: #073a26;
-    --primary-light: rgba(14, 90, 60, 0.08);
-    --accent-color: #E6B325;
-    --accent-hover: #c99b1e;
-    --accent-light: rgba(230, 179, 37, 0.1);
+    --bg-color: #FFFBFB;
+    --primary-color: #7D044B;
+    --primary-hover: #65033D;
+    --primary-light: rgba(125, 4, 75, 0.08);
+    --accent-color: #C99635;
+    --accent-hover: #B58428;
+    --accent-light: rgba(201, 150, 53, 0.12);
     
-    --text-dark: #1F1B15;      /* Rich dark bronze/charcoal */
-    --text-muted: #5C554B;     /* Warm muted grey */
-    --text-light: #F5F1EA;     /* Soft linen white */
+    --text-dark: #141414;      /* Deep black */
+    --text-muted: #63585E;     /* Warm muted charcoal */
+    --text-light: #FFFBFB;     /* Warm linen white */
     
     --white: #FFFFFF;
     --card-bg: #FFFFFF;
-    --border-color: rgba(14, 90, 60, 0.08);
-    --border-color-light: rgba(14, 90, 60, 0.04);
+    --section-alt-bg: #FAF5F7;
+    --border-color: rgba(125, 4, 75, 0.08);
+    --border-color-light: rgba(20, 20, 20, 0.06);
   
     /* Typography */
     --font-heading: 'Playfair Display', Georgia, serif;
@@ -33,10 +34,10 @@
     --btn-radius: 8px;
   
     /* Elevation & Shadows */
-    --shadow-sm: 0 4px 12px rgba(31, 27, 21, 0.03);
-    --shadow-md: 0 12px 32px rgba(31, 27, 21, 0.05);
-    --shadow-lg: 0 20px 48px rgba(31, 27, 21, 0.08);
-    --shadow-hover: 0 28px 56px rgba(14, 90, 60, 0.12);
+    --shadow-sm: 0 4px 14px rgba(20, 20, 20, 0.04);
+    --shadow-md: 0 12px 32px rgba(20, 20, 20, 0.06);
+    --shadow-lg: 0 20px 48px rgba(20, 20, 20, 0.08);
+    --shadow-hover: 0 24px 50px rgba(125, 4, 75, 0.14);
   
     /* Animations & Transitions */
     --transition-smooth: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -135,13 +136,14 @@
   .btn-primary {
     background-color: var(--accent-color);
     color: var(--text-dark);
-    box-shadow: 0 4px 15px rgba(230, 179, 37, 0.2);
+    box-shadow: 0 4px 15px rgba(201, 150, 53, 0.25);
   }
   
   .btn-primary:hover {
     background-color: var(--accent-hover);
+    color: var(--text-dark);
     transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 8px 25px rgba(230, 179, 37, 0.35);
+    box-shadow: 0 8px 25px rgba(201, 150, 53, 0.35);
   }
   
   .btn-primary:active {
@@ -152,12 +154,13 @@
   .btn-secondary {
     background-color: transparent;
     color: var(--text-dark);
-    border: 1px solid rgba(31, 27, 21, 0.2);
+    border: 1px solid rgba(20, 20, 20, 0.15);
   }
   
   .btn-secondary:hover {
-    background-color: rgba(31, 27, 21, 0.03);
-    border-color: rgba(31, 27, 21, 0.4);
+    background-color: rgba(125, 4, 75, 0.04);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
     transform: translateY(-2px);
   }
   
@@ -165,20 +168,20 @@
     transform: translateY(0);
   }
   
-  /* Green Action Button */
-  .btn-green {
+  /* Primary Action Button */
+  .btn-green, .btn-action {
     background-color: var(--primary-color);
     color: var(--white);
-    box-shadow: 0 4px 15px rgba(14, 90, 60, 0.2);
+    box-shadow: 0 4px 15px rgba(125, 4, 75, 0.2);
   }
   
-  .btn-green:hover {
+  .btn-green:hover, .btn-action:hover {
     background-color: var(--primary-hover);
     transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 8px 25px rgba(14, 90, 60, 0.35);
+    box-shadow: 0 8px 25px rgba(125, 4, 75, 0.35);
   }
   
-  .btn-green:active {
+  .btn-green:active, .btn-action:active {
     transform: translateY(0) scale(1);
   }
   
@@ -190,12 +193,12 @@
     background: var(--bg-color);
   }
   ::-webkit-scrollbar-thumb {
-    background: #D8D2C4;
+    background: #E8DCE2;
     border-radius: 5px;
     border: 2px solid var(--bg-color);
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #BCB4A4;
+    background: #D4BFCB;
   }
   
   /* Scroll reveal elements (fallback and class triggers) */

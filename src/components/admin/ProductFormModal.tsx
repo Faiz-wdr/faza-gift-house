@@ -242,21 +242,8 @@ export default function ProductFormModal({
 
     try {
       if (imageFile) {
-        const hasLocalSession = typeof window !== "undefined" && localStorage.getItem("faza_local_session");
-        const isSupabaseUnconfigured = !import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY === "your-anon-key-here";
-
-        if (hasLocalSession || isSupabaseUnconfigured) {
-          // Convert imageFile to base64 for local storage persistence
-          finalImageUrl = await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = reject;
-            reader.readAsDataURL(imageFile);
-          });
-        } else {
-          const { storageService } = await import("../../services/storageService");
-          finalImageUrl = await storageService.uploadAsset(imageFile, "products");
-        }
+        const { storageService } = await import("../../services/storageService");
+        finalImageUrl = await storageService.uploadAsset(imageFile, "products");
       }
 
       // Pack into AdminProduct object

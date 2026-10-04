@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { X, Printer, Plus, Trash2, ArrowLeft } from "lucide-react";
+import { createPortal } from "react-dom";
+import { X, Printer, Plus, Trash2, Send } from "lucide-react";
 import type { Order, OrderItem } from "./AdminOrders";
 import invoiceLogo from "../../assets/invoice-im.png";
 import "./InvoiceModal.css";
@@ -20,6 +21,7 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
 
   // Invoice items
   const [items, setItems] = useState<OrderItem[]>([]);
+  const [paidAmount, setPaidAmount] = useState(0);
   const [discount, setDiscount] = useState(0);
   const [note, setNote] = useState("");
 
@@ -78,24 +80,25 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
     return `${day}-${month}-${year}`;
   };
 
-  // Pre-fill fields from order details on mount only
+  // Pre-fill fields from order details on mount or whenever order changes
   useEffect(() => {
     if (order) {
       setInvoiceNo(order.id.replace("#", "")); // Strip leading hash if present
       setInvoiceDate(formatDateToInvoiceStyle(order.orderDate));
-      setCompanyName(order.customerName);
-      setAddress(order.customerAddress);
-      setMobileNumber(order.customerPhone);
+      setCompanyName(order.customerName || "");
+      setAddress(order.customerAddress || "");
+      setMobileNumber(order.customerPhone || "");
       setItems(
         order.items.map((item) => ({
           ...item,
           productTitle: item.productTitle + (item.size ? ` (${item.size.toUpperCase()})` : "") + (item.material ? ` - ${item.material.toUpperCase()}` : "")
         }))
       );
+      setPaidAmount(order.paidAmount || 0);
       setDiscount(0); // Default discount to 0
       setNote("");
     }
-  }, []);
+  }, [order]);
 
   // Edit Handlers
   const handleItemChange = (index: number, field: keyof OrderItem, val: any) => {
@@ -137,38 +140,96 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
 
   // Computations
   const subTotal = items.reduce((sum, item) => sum + item.total, 0);
-  const balance = Math.max(0, subTotal - discount);
+  const balance = Math.max(0, subTotal - discount - paidAmount);
   const totalDue = balance;
 
   // Print helper
   const handlePrint = () => {
+    // Scroll sheet to top so header is never scrolled off or clipped
+    const scrollWrapper = document.querySelector(".invoice-sheet-scroll-wrapper");
+    if (scrollWrapper) {
+      scrollWrapper.scrollTop = 0;
+    }
+
+    const originalTitle = document.title;
+    // Set a clean document title so browser uses this as default PDF file name
+    document.title = `Invoice_${(invoiceNo || order.id || "Faza").replace(/[^a-zA-Z0-9_-]/g, "")}`;
     window.print();
+    setTimeout(() => {
+      document.title = originalTitle;
+    }, 1200);
+  };
+
+  // Send invoice to client WhatsApp
+  const handleSendToClient = () => {
+    const rawPhone = (mobileNumber || order.customerPhone || "").trim();
+    let cleanPhone = rawPhone.replace(/[^0-9]/g, "");
+
+    if (!cleanPhone) {
+      const inputPhone = window.prompt("Enter customer WhatsApp number:", "");
+      if (!inputPhone) return;
+      cleanPhone = inputPhone.replace(/[^0-9]/g, "");
+    }
+
+    if (cleanPhone.length === 10) {
+      cleanPhone = `91${cleanPhone}`;
+    }
+
+    const itemsSummary = items
+      .map((item, idx) => `${idx + 1}. ${item.productTitle} × ${item.qty} = ₹${item.total.toLocaleString("en-IN")}`)
+      .join("\n");
+
+    const message = `*INVOICE FROM FAZA GIFT HOUSE*
+----------------------------------------
+*Invoice No:* ${invoiceNo || order.id}
+*Date:* ${invoiceDate}
+*Customer:* ${companyName || order.customerName}
+${address ? `*Address:* ${address}\n` : ""}${mobileNumber ? `*Phone:* ${mobileNumber}\n` : ""}
+*Items Ordered:*
+${itemsSummary}
+
+----------------------------------------
+*Subtotal:* ₹${subTotal.toLocaleString("en-IN")}
+*Paid Amount:* ₹${paidAmount.toLocaleString("en-IN")}
+${discount > 0 ? `*Discount:* ₹${discount.toLocaleString("en-IN")}\n` : ""}*Total Due:* ₹${totalDue.toLocaleString("en-IN")}
+----------------------------------------
+
+Thank you for choosing *Faza Gift House*!
+Malappuram, Kerala | +91 91880 86244`;
+
+    const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+    window.open(waUrl, "_blank");
   };
 
   // Fill up empty rows to match the reference visual design (e.g. at least 6 rows total)
   const minRows = 6;
   const emptyRowsCount = Math.max(0, minRows - items.length);
 
-  return (
+  return createPortal(
     <div className="invoice-modal-backdrop">
       <div className="invoice-modal-container">
 
         {/* Top Floating Actions Header */}
         <header className="invoice-modal-toolbar">
           <div className="toolbar-left">
-            <button className="btn-toolbar-back" onClick={onClose}>
-              <ArrowLeft size={18} />
-              <span>Back to Orders</span>
+            <button
+              type="button"
+              className="btn-toolbar-close"
+              onClick={onClose}
+              aria-label="Close Invoice"
+              title="Close"
+            >
+              <X size={20} strokeWidth={2.5} />
             </button>
           </div>
           <div className="toolbar-actions">
-            <button className="btn-invoice-cancel" onClick={onClose}>
-              <X size={16} />
-              <span>Cancel</span>
+            <button className="btn-invoice-send" onClick={handleSendToClient} title="Send Invoice to Client via WhatsApp">
+              <Send size={16} />
+              <span>Send</span>
             </button>
             <button className="btn-invoice-print btn-green" onClick={handlePrint}>
               <Printer size={16} />
-              <span>Download PDF / Print</span>
+              <span>Download</span>
             </button>
           </div>
         </header>
@@ -224,28 +285,33 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
                 <span className="meta-label">Bill to</span>
                 <input
                   type="text"
-                  className="invoice-meta-input company-name-input"
+                  className="invoice-meta-input company-name-input screen-only-element"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  placeholder="[Company Name]"
+                  placeholder="Customer Name"
                   onFocus={() => handleSectionFocus("bill-to")}
                 />
+                <div className="company-name-print print-meta-company print-only-element">{companyName || "—"}</div>
+
                 <textarea
-                  className="invoice-meta-input address-input"
+                  className="invoice-meta-input address-input screen-only-element"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  placeholder="[place or address]"
+                  placeholder="Delivery Address"
                   rows={2}
                   onFocus={() => handleSectionFocus("bill-to")}
                 />
+                <div className="address-print print-meta-address print-only-element">{address || "—"}</div>
+
                 <input
                   type="text"
-                  className="invoice-meta-input mobile-input"
+                  className="invoice-meta-input mobile-input screen-only-element"
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value)}
-                  placeholder="[Mobile Number]"
+                  placeholder="Phone Number"
                   onFocus={() => handleSectionFocus("bill-to")}
                 />
+                <div className="mobile-print print-meta-phone print-only-element">{mobileNumber}</div>
               </div>
 
               <div
@@ -258,31 +324,33 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
                   }
                 }}
               >
-                <span className="meta-label">Invoice Details</span>
+                <span className="meta-label text-right">Invoice Details</span>
                 <div className="invoice-details-table">
                   <div className="details-row">
                     <span className="row-key">Invoice No</span>
                     <span className="row-colon">:</span>
                     <input
                       type="text"
-                      className="invoice-meta-input details-val-input font-mono"
+                      className="invoice-meta-input details-val-input font-mono screen-only-element"
                       value={invoiceNo}
                       onChange={(e) => setInvoiceNo(e.target.value)}
                       placeholder="Invoice Number"
                       onFocus={() => handleSectionFocus("details")}
                     />
+                    <span className="details-val-print font-mono print-only-element">{invoiceNo}</span>
                   </div>
                   <div className="details-row">
                     <span className="row-key">Invoice Date</span>
                     <span className="row-colon">:</span>
                     <input
                       type="text"
-                      className="invoice-meta-input details-val-input"
+                      className="invoice-meta-input details-val-input screen-only-element"
                       value={invoiceDate}
                       onChange={(e) => setInvoiceDate(e.target.value)}
                       placeholder="Invoice Date"
                       onFocus={() => handleSectionFocus("details")}
                     />
+                    <span className="details-val-print print-only-element">{invoiceDate}</span>
                   </div>
                 </div>
               </div>
@@ -319,25 +387,29 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
                       <td className="col-product">
                         <input
                           type="text"
-                          className="invoice-table-input"
+                          className="invoice-table-input screen-only-element"
                           value={item.productTitle}
                           onChange={(e) => handleItemChange(idx, "productTitle", e.target.value)}
                           placeholder="Product Title"
                           onFocus={() => handleSectionFocus("items")}
                         />
+                        <div className="product-title-print print-only-element">
+                          {item.productTitle}
+                        </div>
                       </td>
                       <td className="col-qty text-center">
                         <input
                           type="number"
-                          className="invoice-table-input text-center"
+                          className="invoice-table-input text-center screen-only-element"
                           value={item.qty}
                           onChange={(e) => handleItemChange(idx, "qty", parseInt(e.target.value) || 0)}
                           min="1"
                           onFocus={() => handleSectionFocus("items")}
                         />
+                        <span className="print-only-element">{item.qty}</span>
                       </td>
                       <td className="col-price text-center">
-                        <div className="price-input-cell">
+                        <div className="price-input-cell screen-only-element">
                           <span>₹</span>
                           <input
                             type="number"
@@ -348,6 +420,7 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
                             onFocus={() => handleSectionFocus("items")}
                           />
                         </div>
+                        <span className="print-only-element">₹{item.price}</span>
                       </td>
                       <td className="col-total text-right">
                         <span className="item-total-val">₹{item.total}</span>
@@ -405,17 +478,39 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
                   <span className="val">₹{subTotal}</span>
                 </div>
                 <div className="financials-row">
+                  <span className="lbl">Paid Amount</span>
+                  <span className="val editing-val">
+                    <span className="screen-input-wrap screen-only-element">
+                      <span className="curr-sym">₹</span>
+                      <input
+                        type="number"
+                        className="invoice-financial-input"
+                        value={paidAmount === 0 ? "" : paidAmount}
+                        onChange={(e) => setPaidAmount(e.target.value === "" ? 0 : Math.max(0, parseFloat(e.target.value) || 0))}
+                        placeholder="0"
+                        min="0"
+                        onFocus={() => handleSectionFocus("financials")}
+                      />
+                    </span>
+                    <span className="print-val print-only-element">₹{paidAmount}</span>
+                  </span>
+                </div>
+                <div className="financials-row">
                   <span className="lbl">Discount</span>
                   <span className="val editing-val">
-                    <span>₹</span>
-                    <input
-                      type="number"
-                      className="invoice-financial-input"
-                      value={discount}
-                      onChange={(e) => setDiscount(Math.max(0, parseFloat(e.target.value) || 0))}
-                      min="0"
-                      onFocus={() => handleSectionFocus("financials")}
-                    />
+                    <span className="screen-input-wrap screen-only-element">
+                      <span className="curr-sym">₹</span>
+                      <input
+                        type="number"
+                        className="invoice-financial-input"
+                        value={discount === 0 ? "" : discount}
+                        onChange={(e) => setDiscount(e.target.value === "" ? 0 : Math.max(0, parseFloat(e.target.value) || 0))}
+                        placeholder="0"
+                        min="0"
+                        onFocus={() => handleSectionFocus("financials")}
+                      />
+                    </span>
+                    <span className="print-val print-only-element">₹{discount}</span>
                   </span>
                 </div>
                 <div className="financials-row">
@@ -445,13 +540,16 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
             >
               <span className="note-title-lbl">Note</span>
               <textarea
-                className="invoice-note-textarea"
+                className="invoice-note-textarea screen-only-element"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Write custom payment instructions or notes here..."
                 rows={3}
                 onFocus={() => handleSectionFocus("notes")}
               />
+              <div className="invoice-note-print print-only-element">
+                {note || "Thank you for choosing Faza Gift House!"}
+              </div>
             </div>
 
             {/* 6. Footer Thank you */}
@@ -478,6 +576,7 @@ export default function InvoiceModal({ order, onClose }: InvoiceModalProps) {
         )}
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

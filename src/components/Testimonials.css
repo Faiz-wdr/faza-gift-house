@@ -1,7 +1,7 @@
 .testimonials-section {
   background-color: var(--bg-color);
   padding: 6rem 0;
-  border-top: 1px solid rgba(14, 90, 60, 0.05);
+  border-top: 1px solid rgba(125, 4, 75, 0.05);
 }
 
 .testimonials-header {
@@ -40,7 +40,7 @@
 .testimonial-card:hover {
   transform: translateY(-6px);
   box-shadow: var(--shadow-hover);
-  border-color: rgba(14, 90, 60, 0.08);
+  border-color: rgba(125, 4, 75, 0.12);
 }
 
 .testimonial-stars {
@@ -62,7 +62,7 @@
   align-items: center;
   gap: 1.1rem;
   margin-top: 0.5rem;
-  border-top: 1px solid rgba(14, 90, 60, 0.05);
+  border-top: 1px solid rgba(20, 20, 20, 0.06);
   padding-top: 1.2rem;
 }
 
@@ -71,8 +71,8 @@
   height: 44px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid rgba(14, 90, 60, 0.1);
-  background-color: #ECE7DF;
+  border: 2px solid rgba(125, 4, 75, 0.12);
+  background-color: #FAF5F7;
 }
 
 .testimonial-meta {

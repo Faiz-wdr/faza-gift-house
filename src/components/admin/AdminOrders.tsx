@@ -1,20 +1,23 @@
-import React, { useState, useEffect } from "react";
-import { 
-  Search, 
-  Plus, 
-  Trash2, 
-  Edit2, 
-  X, 
-  Copy, 
-  Check, 
-  FileText, 
-  Phone, 
-  MapPin, 
-  Calendar 
+import React, { useState, useEffect, useRef } from "react";
+import {
+  Search,
+  Plus,
+  Trash2,
+  Edit2,
+  X,
+  Copy,
+  Check,
+  CheckCircle2,
+  FileText,
+  Phone,
+  MapPin,
+  Calendar,
+  Eye
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { AdminProduct } from "./ProductPreviewModal";
 import InvoiceModal from "./InvoiceModal";
+import { orderService, getCachedCustomers, saveCachedCustomer, deleteCachedCustomer, type CustomerProfile } from "../../services/orderService";
 import "./AdminOrders.css";
 
 export interface OrderItem {
@@ -91,14 +94,46 @@ export default function AdminOrders({
     }, 2500);
   };
 
+  // Mark as Paid handler (syncs payment status, full amount, and finance income)
+  const handleMarkAsPaid = (order: Order) => {
+    const updated: Order = {
+      ...order,
+      payment: "Paid",
+      paidAmount: order.grandTotal,
+      pendingAmount: 0
+    };
+    setSelectedOrder(updated);
+    onEditOrder(updated);
+    setToastMessage(`Order #${order.id} marked as Paid!`);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3000);
+  };
+
+  // Revert to Pending handler
+  const handleMarkAsPending = (order: Order) => {
+    const updated: Order = {
+      ...order,
+      payment: "Pending",
+      paidAmount: 0,
+      pendingAmount: order.grandTotal
+    };
+    setSelectedOrder(updated);
+    onEditOrder(updated);
+    setToastMessage(`Order #${order.id} reverted to Pending.`);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3000);
+  };
+
   // Date parsing helper
   const isWithinDateRange = (dateStr: string, filter: string): boolean => {
     if (filter === "all") return true;
-    
+
     // Parse order date
     const orderDate = new Date(dateStr);
     const today = new Date("2026-06-05"); // Assume current project context date is June 5, 2026
-    
+
     // Clean times
     orderDate.setHours(0, 0, 0, 0);
     today.setHours(0, 0, 0, 0);
@@ -120,7 +155,7 @@ export default function AdminOrders({
   const filteredOrders = orders.filter((order) => {
     // Search match
     const cleanSearch = searchQuery.toLowerCase().trim();
-    const matchesSearch = !cleanSearch || 
+    const matchesSearch = !cleanSearch ||
       order.id.toLowerCase().includes(cleanSearch) ||
       order.customerName.toLowerCase().includes(cleanSearch) ||
       order.trackingId.toLowerCase().includes(cleanSearch);
@@ -173,11 +208,11 @@ export default function AdminOrders({
 
   return (
     <div className="admin-orders-container">
-      
+
       {/* Toast Notification Container */}
       <AnimatePresence>
         {toastMessage && (
-          <motion.div 
+          <motion.div
             className="orders-toast"
             initial={{ opacity: 0, y: -20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -192,26 +227,32 @@ export default function AdminOrders({
 
       {/* Toolbar controls */}
       <div className="orders-toolbar">
-        {/* Search Input bar */}
-        <div className="search-bar-wrapper">
-          <Search size={18} className="search-icon" />
-          <input
-            type="text"
-            placeholder="Search Order ID, Customer Name, or Tracking ID..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          {searchQuery && (
-            <button className="clear-search-btn" onClick={() => setSearchQuery("")}>
-              <X size={16} />
-            </button>
-          )}
+        {/* Search and Add Order in one line */}
+        <div className="toolbar-search-row">
+          <div className="search-bar-wrapper">
+            <Search size={18} className="search-icon" />
+            <input
+              type="text"
+              placeholder="Search Order ID, Customer Name, or Tracking ID..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button className="clear-search-btn" onClick={() => setSearchQuery("")}>
+                <X size={16} />
+              </button>
+            )}
+          </div>
+
+          <button className="btn btn-green add-order-btn" onClick={handleAddClick}>
+            <Plus size={16} />
+            <span>Add Order</span>
+          </button>
         </div>
 
         {/* Filters grid */}
         <div className="toolbar-filters">
           <div className="filter-select-group">
-            <span className="filter-label">Status</span>
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
               <option value="all">All Statuses</option>
               <option value="Delivered">Delivered</option>
@@ -221,7 +262,6 @@ export default function AdminOrders({
           </div>
 
           <div className="filter-select-group">
-            <span className="filter-label">Payment</span>
             <select value={paymentFilter} onChange={(e) => setPaymentFilter(e.target.value)}>
               <option value="all">All Payments</option>
               <option value="Paid">Paid</option>
@@ -231,7 +271,6 @@ export default function AdminOrders({
           </div>
 
           <div className="filter-select-group">
-            <span className="filter-label">Date</span>
             <select value={dateFilter} onChange={(e) => setDateFilter(e.target.value)}>
               <option value="all">All Dates</option>
               <option value="today">Today</option>
@@ -241,17 +280,11 @@ export default function AdminOrders({
           </div>
 
           <div className="filter-select-group">
-            <span className="filter-label">Sort By</span>
             <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
               <option value="latest">Latest First</option>
               <option value="oldest">Oldest First</option>
             </select>
           </div>
-
-          <button className="btn btn-green add-order-btn" onClick={handleAddClick}>
-            <Plus size={16} />
-            <span>Add Order</span>
-          </button>
         </div>
       </div>
 
@@ -280,12 +313,12 @@ export default function AdminOrders({
               {sortedOrders.map((order) => {
                 // Short product list preview
                 const firstItem = order.items[0];
-                const productsText = order.items.length === 1 
+                const productsText = order.items.length === 1
                   ? firstItem ? `${firstItem.productTitle} (${firstItem.size.toUpperCase()})` : "—"
                   : firstItem ? `${firstItem.productTitle} +${order.items.length - 1}` : `${order.items.length} Products`;
 
                 return (
-                  <tr 
+                  <tr
                     key={order.id}
                     className={`order-row ${selectedOrder?.id === order.id ? "active-row" : ""}`}
                     onClick={() => setSelectedOrder(order)}
@@ -307,14 +340,22 @@ export default function AdminOrders({
                     </td>
                     <td className="order-cell-date">{order.orderDate}</td>
                     <td className="order-cell-actions" onClick={(e) => e.stopPropagation()}>
-                      <button 
+                      <button
+                        className="btn-table-invoice"
+                        onClick={(e) => handleInvoiceClick(order, e)}
+                        title="View Invoice"
+                      >
+                        <Eye size={14} />
+                        <span>Invoice</span>
+                      </button>
+                      <button
                         className="action-icon-btn edit"
                         onClick={(e) => handleEditClick(order, e)}
                         title="Edit Order"
                       >
                         <Edit2 size={16} />
                       </button>
-                      <button 
+                      <button
                         className="action-icon-btn delete"
                         onClick={(e) => handleDeleteClick(order.id, e)}
                         title="Delete Order"
@@ -334,14 +375,14 @@ export default function AdminOrders({
       <AnimatePresence>
         {selectedOrder && (
           <>
-            <motion.div 
+            <motion.div
               className="drawer-backdrop"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setSelectedOrder(null)}
             />
-            <motion.div 
+            <motion.div
               className="details-drawer"
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
@@ -432,7 +473,7 @@ export default function AdminOrders({
                   <div className="tracking-id-section">
                     <span className="info-label">Logistics Tracking ID</span>
                     {selectedOrder.trackingId ? (
-                      <div 
+                      <div
                         className={`tracking-copy-box ${copiedId ? "copied" : ""}`}
                         onClick={(e) => handleCopyTracking(selectedOrder.trackingId, e)}
                         title="Click to copy Tracking ID"
@@ -452,10 +493,10 @@ export default function AdminOrders({
                   <div className="drawer-products-list">
                     {selectedOrder.items.map((item, idx) => (
                       <div key={idx} className="drawer-product-row">
-                        <img 
-                          src={item.productImage || "/placeholder.png"} 
-                          alt={item.productTitle} 
-                          className="item-row-img" 
+                        <img
+                          src={item.productImage || "/placeholder.png"}
+                          alt={item.productTitle}
+                          className="item-row-img"
                         />
                         <div className="item-row-details">
                           <h5 className="item-row-name">{item.productTitle}</h5>
@@ -503,14 +544,40 @@ export default function AdminOrders({
                   </div>
                 </div>
 
-                {/* Drawer Footer Button */}
+                {/* Drawer Footer Actions */}
                 <div className="drawer-footer-actions">
-                  <button 
+                  {selectedOrder.payment !== "Paid" ? (
+                    <button
+                      type="button"
+                      className="btn btn-mark-paid-primary"
+                      onClick={() => handleMarkAsPaid(selectedOrder)}
+                    >
+                      <CheckCircle2 size={18} />
+                      <span>Mark as Paid (₹{selectedOrder.pendingAmount > 0 ? selectedOrder.pendingAmount : selectedOrder.grandTotal})</span>
+                    </button>
+                  ) : (
+                    <div className="paid-confirmed-bar">
+                      <div className="paid-verified-badge">
+                        <CheckCircle2 size={15} />
+                        <span>Payment Received (₹{selectedOrder.grandTotal.toLocaleString("en-IN")})</span>
+                      </div>
+                      <button
+                        type="button"
+                        className="btn-unmark-link"
+                        onClick={() => handleMarkAsPending(selectedOrder)}
+                        title="Revert payment status to Pending"
+                      >
+                        Revert to Pending
+                      </button>
+                    </div>
+                  )}
+
+                  <button
                     className="btn btn-whatsapp w-100"
                     onClick={(e) => handleInvoiceClick(selectedOrder, e)}
                   >
                     <FileText size={18} />
-                    <span>Generate Invoice PDF</span>
+                    <span>Share Invoice</span>
                   </button>
                 </div>
               </div>
@@ -590,14 +657,163 @@ function OrderFormModal({ order, products, orders, onClose, onSave }: OrderFormM
   const [status, setStatus] = useState<"Delivered" | "Pending" | "In Progress">("Pending");
   const [payment, setPayment] = useState<"Paid" | "Pending" | "Partial">("Pending");
   const [trackingId, setTrackingId] = useState("");
-  
+
   // Multiple items list state
   const [items, setItems] = useState<OrderItem[]>([
     { productId: "", productTitle: "", productImage: "", size: "", material: "", qty: 1, price: 0, total: 0 }
   ]);
-  
+
   const [additionalCharges, setAdditionalCharges] = useState(0);
   const [paidAmount, setPaidAmount] = useState(0);
+
+  // Customer autocomplete & persistent suggestions state
+  const [savedCustomers, setSavedCustomers] = useState<CustomerProfile[]>([]);
+  const [filteredSuggestions, setFilteredSuggestions] = useState<CustomerProfile[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [autofilledNotice, setAutofilledNotice] = useState(false);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  // Load and merge saved customers from local storage, current orders, and database
+  useEffect(() => {
+    const loadCustomerProfiles = async () => {
+      const map = new Map<string, CustomerProfile>();
+
+      // 1. From local storage cache
+      const cached = getCachedCustomers();
+      cached.forEach((c) => {
+        if (c.name && c.name.trim()) {
+          map.set(c.name.trim().toLowerCase(), {
+            name: c.name.trim(),
+            phone: c.phone || "",
+            address: c.address || ""
+          });
+        }
+      });
+
+      // 2. From orders prop
+      if (orders && orders.length > 0) {
+        orders.forEach((o) => {
+          if (o.customerName && o.customerName.trim()) {
+            const key = o.customerName.trim().toLowerCase();
+            const existing = map.get(key);
+            map.set(key, {
+              name: o.customerName.trim(),
+              phone: o.customerPhone || existing?.phone || "",
+              address: o.customerAddress || existing?.address || ""
+            });
+          }
+        });
+      }
+
+      // 3. From Supabase database
+      try {
+        const remote = await orderService.getCustomers();
+        remote.forEach((c) => {
+          if (c.name && c.name.trim()) {
+            const key = c.name.trim().toLowerCase();
+            const existing = map.get(key);
+            map.set(key, {
+              name: c.name.trim(),
+              phone: c.phone || existing?.phone || "",
+              address: c.address || existing?.address || ""
+            });
+          }
+        });
+      } catch (err) {
+        // silent fallback to local/orders
+      }
+
+      const list = Array.from(map.values());
+      setSavedCustomers(list);
+    };
+
+    loadCustomerProfiles();
+  }, [orders]);
+
+  // Click outside to close suggestion dropdown
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Customer Name change handler with live search suggestions
+  const handleCustomerNameChange = (val: string) => {
+    setCustomerName(val);
+    setAutofilledNotice(false);
+
+    if (val.trim().length > 0) {
+      const q = val.trim().toLowerCase();
+      const matches = savedCustomers.filter(
+        (c) =>
+          c.name.toLowerCase().includes(q) ||
+          (c.phone && c.phone.includes(q))
+      );
+      setFilteredSuggestions(matches);
+      setShowSuggestions(matches.length > 0);
+      setHighlightedIndex(-1);
+    } else {
+      setFilteredSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  // Select customer from suggestions dropdown: autofill phone and address!
+  const handleSelectCustomer = (cust: CustomerProfile) => {
+    setCustomerName(cust.name);
+    setCustomerPhone(cust.phone || "");
+    setCustomerAddress(cust.address || "");
+    setShowSuggestions(false);
+    setHighlightedIndex(-1);
+    setAutofilledNotice(true);
+    setTimeout(() => setAutofilledNotice(false), 3500);
+  };
+
+  // Customer deletion state for custom confirmation alert UI
+  const [customerToDelete, setCustomerToDelete] = useState<CustomerProfile | null>(null);
+
+  const confirmDeleteCustomer = () => {
+    if (!customerToDelete) return;
+    const cust = customerToDelete;
+
+    setSavedCustomers((prev) => prev.filter((c) => c.name.toLowerCase() !== cust.name.toLowerCase()));
+    setFilteredSuggestions((prev) => prev.filter((c) => c.name.toLowerCase() !== cust.name.toLowerCase()));
+
+    deleteCachedCustomer(cust.name);
+    orderService.deleteCustomer(cust.name).catch((err) => {
+      console.error("Failed to delete customer:", err);
+    });
+
+    setCustomerToDelete(null);
+  };
+
+  const handleDeleteCustomer = (e: React.MouseEvent, cust: CustomerProfile) => {
+    e.stopPropagation();
+    setCustomerToDelete(cust);
+  };
+
+  // Keyboard navigation for suggestions dropdown
+  const handleCustomerKeyDown = (e: React.KeyboardEvent) => {
+    if (!showSuggestions || filteredSuggestions.length === 0) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightedIndex((prev) => (prev + 1) % filteredSuggestions.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightedIndex((prev) => (prev <= 0 ? filteredSuggestions.length - 1 : prev - 1));
+    } else if (e.key === "Enter" && highlightedIndex >= 0) {
+      e.preventDefault();
+      handleSelectCustomer(filteredSuggestions[highlightedIndex]);
+    } else if (e.key === "Escape") {
+      setShowSuggestions(false);
+    }
+  };
 
   // Pre-fill form when editing
   useEffect(() => {
@@ -811,12 +1027,25 @@ function OrderFormModal({ order, products, orders, onClose, onSave }: OrderFormM
       pendingAmount: pendingBillAmount
     };
 
+    // Auto-save customer details for future suggestions
+    if (customerName.trim()) {
+      const profile: CustomerProfile = {
+        name: customerName.trim(),
+        phone: customerPhone.trim(),
+        address: customerAddress.trim()
+      };
+      saveCachedCustomer(profile);
+      orderService.saveCustomer(profile).catch((err) => {
+        console.error("Auto-save customer profile failed:", err);
+      });
+    }
+
     onSave(finalOrder);
   };
 
   return (
     <div className="order-modal-backdrop">
-      <motion.div 
+      <motion.div
         className="order-modal-card"
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -834,20 +1063,64 @@ function OrderFormModal({ order, products, orders, onClose, onSave }: OrderFormM
         {/* Modal Body form */}
         <form onSubmit={handleSubmit} className="order-modal-body">
           <div className="form-sections-scroller">
-            
+
             {/* 1. Customer details */}
             <div className="form-block-card">
-              <h3 className="form-block-title">Customer Information</h3>
               <div className="form-fields-grid">
-                <div className="form-input-wrapper">
-                  <label>Customer Name *</label>
-                  <input
-                    type="text"
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    placeholder="Enter customer full name"
-                    required
-                  />
+                <div className="form-input-wrapper customer-autocomplete-wrap" ref={suggestionsRef}>
+                  <div className="label-with-pill">
+                    <label>Customer Name *</label>
+                    {autofilledNotice && (
+                      <span className="customer-autofilled-pill">
+                        <Check size={12} />
+                        <span>Autofilled</span>
+                      </span>
+                    )}
+                  </div>
+                  <div className="autocomplete-input-box">
+                    <input
+                      type="text"
+                      value={customerName}
+                      onChange={(e) => handleCustomerNameChange(e.target.value)}
+                      onFocus={() => {
+                        if (customerName.trim().length > 0 && filteredSuggestions.length > 0) {
+                          setShowSuggestions(true);
+                        }
+                      }}
+                      onKeyDown={handleCustomerKeyDown}
+                      placeholder="Enter customer full name"
+                      required
+                      autoComplete="off"
+                    />
+                  </div>
+
+                  {/* Minimal Suggestions Dropdown */}
+                  {showSuggestions && filteredSuggestions.length > 0 && (
+                    <ul className="customer-suggestions-dropdown" role="listbox">
+                      {filteredSuggestions.map((cust, idx) => (
+                        <li
+                          key={`${cust.name}-${cust.phone}-${idx}`}
+                          className={`customer-suggestion-item ${highlightedIndex === idx ? "highlighted" : ""}`}
+                          onClick={() => handleSelectCustomer(cust)}
+                          onMouseEnter={() => setHighlightedIndex(idx)}
+                        >
+                          <span className="cust-sugg-name">{cust.name}</span>
+                          <div className="cust-sugg-right">
+                            {cust.phone && <span className="cust-sugg-phone">{cust.phone}</span>}
+                            <button
+                              type="button"
+                              className="cust-delete-btn"
+                              onClick={(e) => handleDeleteCustomer(e, cust)}
+                              title={`Delete ${cust.name}`}
+                              aria-label={`Delete ${cust.name}`}
+                            >
+                              <X size={13} />
+                            </button>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
 
                 <div className="form-input-wrapper">
@@ -874,7 +1147,6 @@ function OrderFormModal({ order, products, orders, onClose, onSave }: OrderFormM
 
             {/* 2. Order parameters */}
             <div className="form-block-card">
-              <h3 className="form-block-title">Dates & Parameters</h3>
               <div className="form-fields-grid">
                 <div className="form-input-wrapper">
                   <label>Order Date *</label>
@@ -929,8 +1201,8 @@ function OrderFormModal({ order, products, orders, onClose, onSave }: OrderFormM
             <div className="form-block-card">
               <div className="form-row-header-actions">
                 <h3 className="form-block-title">Items & Pricing</h3>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="btn-add-item-row"
                   onClick={handleAddRow}
                 >
@@ -942,7 +1214,7 @@ function OrderFormModal({ order, products, orders, onClose, onSave }: OrderFormM
               <div className="items-list-container">
                 {items.map((item, index) => {
                   const currentProd = products.find(p => p.id === item.productId);
-                  const enabledSizes = currentProd && currentProd.enableSizes 
+                  const enabledSizes = currentProd && currentProd.enableSizes
                     ? (["small", "medium", "large"] as const).filter(k => currentProd.sizes[k].enabled)
                     : [];
                   const enabledMats = currentProd && currentProd.enableMaterials
@@ -951,7 +1223,7 @@ function OrderFormModal({ order, products, orders, onClose, onSave }: OrderFormM
 
                   return (
                     <div key={index} className="form-item-row">
-                      
+
                       {/* Product select dropdown */}
                       <div className="row-input product-select-box">
                         <label>Product *</label>
@@ -1051,7 +1323,6 @@ function OrderFormModal({ order, products, orders, onClose, onSave }: OrderFormM
 
             {/* 4. Financial computations */}
             <div className="form-block-card">
-              <h3 className="form-block-title">Billing summary</h3>
               <div className="form-fields-grid">
                 <div className="form-input-wrapper">
                   <label>Additional Charges (Tax/Logistics)</label>
@@ -1105,6 +1376,46 @@ function OrderFormModal({ order, products, orders, onClose, onSave }: OrderFormM
           </div>
         </form>
 
+        {/* Custom Confirmation Alert for Deleting Customer */}
+        <AnimatePresence>
+          {customerToDelete && (
+            <div className="cust-alert-backdrop" onClick={() => setCustomerToDelete(null)}>
+              <motion.div
+                className="cust-alert-card"
+                initial={{ opacity: 0, scale: 0.94, y: 12 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.94, y: 12 }}
+                transition={{ duration: 0.2 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="cust-alert-icon-wrap">
+                  <Trash2 size={20} />
+                </div>
+                <h4 className="cust-alert-title">Delete Customer</h4>
+                <p className="cust-alert-text">
+                  Delete <strong>{customerToDelete.name}</strong> from saved list?
+                </p>
+                <div className="cust-alert-actions">
+                  <button
+                    type="button"
+                    className="cust-alert-btn-cancel"
+                    onClick={() => setCustomerToDelete(null)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="cust-alert-btn-delete"
+                    onClick={confirmDeleteCustomer}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
       </motion.div>
     </div>
   );
@@ -1120,7 +1431,7 @@ interface DeleteConfirmModalProps {
 function DeleteConfirmModal({ orderId, onClose, onConfirm }: DeleteConfirmModalProps) {
   return (
     <div className="delete-modal-backdrop" onClick={onClose}>
-      <motion.div 
+      <motion.div
         className="delete-modal-card"
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -1129,19 +1440,19 @@ function DeleteConfirmModal({ orderId, onClose, onConfirm }: DeleteConfirmModalP
         onClick={(e) => e.stopPropagation()}
       >
         <div className="delete-modal-icon-wrapper">
-          <motion.div 
+          <motion.div
             className="delete-modal-icon-pulsing"
-            animate={{ 
+            animate={{
               scale: [1, 1.15, 1],
               opacity: [0.4, 0.8, 0.4]
             }}
-            transition={{ 
-              repeat: Infinity, 
-              duration: 1.8, 
-              ease: "easeInOut" 
+            transition={{
+              repeat: Infinity,
+              duration: 1.8,
+              ease: "easeInOut"
             }}
           />
-          <motion.div 
+          <motion.div
             className="delete-modal-icon"
             initial={{ rotate: -15 }}
             animate={{ rotate: [0, -10, 10, -5, 5, 0] }}
