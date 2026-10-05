@@ -74,6 +74,11 @@ export default function Footer() {
                 Contact Us
               </a>
             </li>
+            <li>
+              <Link to="/login">
+                Admin Login
+              </Link>
+            </li>
           </ul>
         </div>
 
@@ -101,13 +106,13 @@ export default function Footer() {
       {/* Bottom Legal Bar */}
       <div className="footer-bottom">
         <div className="container footer-bottom-container">
-          <p className="copyright">
-            &copy; {currentYear} Faza Gift House. All rights reserved.
-          </p>
           <div className="footer-legal-links">
             <Link to="/privacy">Privacy Policy</Link>
             <Link to="/terms">Terms & Conditions</Link>
           </div>
+          <p className="copyright">
+            &copy; {currentYear} Faza Gift House. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

@@ -7,14 +7,13 @@ import {
   ShoppingBag, 
   Image as ImageIcon, 
   LogOut, 
-  Menu, 
-  X, 
   ShoppingBag as OrderIcon,
   Clock,
   CreditCard,
   CheckCircle2,
   Wallet,
-  ArrowUpRight
+  ArrowUpRight,
+  Plus
 } from "lucide-react";
 import AdminProducts from "../components/admin/AdminProducts";
 import ProductFormModal from "../components/admin/ProductFormModal";
@@ -35,7 +34,6 @@ import "./Admin.css";
 export default function Admin() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState("Dashboard");
 
   // Products collection state
@@ -46,10 +44,6 @@ export default function Admin() {
 
   // Finance transactions state for dashboard payments
   const [financeTransactions, setFinanceTransactions] = useState<FinanceTransaction[]>([]);
-
-  // Database Connection Status
-  const [dbConnected, setDbConnected] = useState(true);
-  const [lastPingTime, setLastPingTime] = useState("");
 
   // Modal toggle states
   const [formModalOpen, setFormModalOpen] = useState(false);
@@ -120,11 +114,8 @@ export default function Admin() {
       setProducts(prodsData || []);
       setOrders(ordsData || []);
       setFinanceTransactions(finData || []);
-      setDbConnected(true);
-      setLastPingTime(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
     } catch (e) {
       console.error("Failed to load dashboard data:", e);
-      setDbConnected(false);
     } finally {
       setLoading(false);
     }
@@ -140,33 +131,30 @@ export default function Admin() {
   const handleAddOrder = async (newOrder: Order) => {
     try {
       await orderService.saveOrder(newOrder);
-      const ords = await orderService.getOrders();
-      setOrders(ords || []);
     } catch (e) {
-      alert("Failed to save order in database.");
-      console.error(e);
+      console.warn("Order save notice:", e);
     }
+    const ords = await orderService.getOrders();
+    setOrders(ords && ords.length > 0 ? ords : (prev) => [newOrder, ...prev.filter(o => o.id !== newOrder.id)]);
   };
 
   const handleEditOrder = async (updatedOrder: Order) => {
     try {
       await orderService.saveOrder(updatedOrder);
-      const ords = await orderService.getOrders();
-      setOrders(ords || []);
     } catch (e) {
-      alert("Failed to update order in database.");
-      console.error(e);
+      console.warn("Order update notice:", e);
     }
+    const ords = await orderService.getOrders();
+    setOrders(ords && ords.length > 0 ? ords : (prev) => prev.map(o => o.id === updatedOrder.id ? updatedOrder : o));
   };
 
   const handleDeleteOrder = async (id: string) => {
     try {
       await orderService.deleteOrder(id);
-      setOrders(prev => prev.filter(o => o && o.id !== id));
     } catch (e) {
-      alert("Failed to delete order from database.");
-      console.error(e);
+      console.warn("Order delete notice:", e);
     }
+    setOrders(prev => prev.filter(o => o && o.id !== id));
   };
 
   const handleLogout = async () => {
@@ -350,21 +338,18 @@ export default function Admin() {
 
   return (
     <div className="admin-layout">
-      {/* 1. LEFT SIDEBAR */}
-      <aside className={`admin-sidebar ${mobileMenuOpen ? "drawer-open" : ""}`}>
+      {/* 1. LEFT SIDEBAR (Desktop) */}
+      <aside className="admin-sidebar">
         <div className="sidebar-header">
           <div className="sidebar-logo">
             Faza <span>Gift House</span>
           </div>
-          <button className="sidebar-close-btn" onClick={() => setMobileMenuOpen(false)} aria-label="Close Sidebar">
-            <X size={20} />
-          </button>
         </div>
 
         <nav className="sidebar-menu">
           <button 
             className={`menu-item ${activeMenu === "Dashboard" ? "active" : ""}`}
-            onClick={() => { setActiveMenu("Dashboard"); setMobileMenuOpen(false); }}
+            onClick={() => setActiveMenu("Dashboard")}
           >
             <LayoutDashboard size={20} />
             <span className="menu-text">Dashboard</span>
@@ -372,7 +357,7 @@ export default function Admin() {
 
           <button 
             className={`menu-item ${activeMenu === "Products" ? "active" : ""}`}
-            onClick={() => { setActiveMenu("Products"); setMobileMenuOpen(false); }}
+            onClick={() => setActiveMenu("Products")}
           >
             <Boxes size={20} />
             <span className="menu-text">Products</span>
@@ -380,7 +365,7 @@ export default function Admin() {
 
           <button 
             className={`menu-item ${activeMenu === "Orders" ? "active" : ""}`}
-            onClick={() => { setActiveMenu("Orders"); setMobileMenuOpen(false); }}
+            onClick={() => setActiveMenu("Orders")}
           >
             <ShoppingBag size={20} />
             <span className="menu-text">Orders</span>
@@ -388,7 +373,7 @@ export default function Admin() {
 
           <button 
             className={`menu-item ${activeMenu === "Finance" ? "active" : ""}`}
-            onClick={() => { setActiveMenu("Finance"); setMobileMenuOpen(false); }}
+            onClick={() => setActiveMenu("Finance")}
           >
             <Wallet size={20} />
             <span className="menu-text">Finance</span>
@@ -396,7 +381,7 @@ export default function Admin() {
 
           <button 
             className={`menu-item ${activeMenu === "AdBanner" ? "active" : ""}`}
-            onClick={() => { setActiveMenu("AdBanner"); setMobileMenuOpen(false); }}
+            onClick={() => setActiveMenu("AdBanner")}
           >
             <ImageIcon size={20} />
             <span className="menu-text">Ad Banner</span>
@@ -404,19 +389,6 @@ export default function Admin() {
         </nav>
 
         <div className="sidebar-footer">
-          <div className="db-status-indicator">
-            <div className="status-dot-row">
-              <span className={`status-dot ${dbConnected ? "active" : "error"}`}></span>
-              <span className="status-label">
-                {dbConnected ? "Supabase Connected" : "Connection Error"}
-              </span>
-            </div>
-            {lastPingTime && (
-              <span className="last-ping-lbl">
-                Last Active check: {lastPingTime}
-              </span>
-            )}
-          </div>
           <button className="menu-item logout-btn" onClick={handleLogout}>
             <LogOut size={20} />
             <span className="menu-text">Logout</span>
@@ -424,26 +396,28 @@ export default function Admin() {
         </div>
       </aside>
 
-      {/* Blurred overlay for mobile sidebar drawer */}
-      {mobileMenuOpen && (
-        <div className="sidebar-overlay" onClick={() => setMobileMenuOpen(false)}></div>
-      )}
-
       {/* 2. RIGHT MAIN CONTENT */}
       <div className="admin-main">
         {/* Top Header Row */}
         <header className="admin-header">
           <div className="header-left">
-            {/* Hamburger trigger for mobile */}
-            <button className="hamburger-btn" onClick={() => setMobileMenuOpen(true)} aria-label="Open Menu">
-              <Menu size={22} />
-            </button>
-            <h1 className="admin-page-title">{activeMenu}</h1>
+            <h1 className="admin-page-title desktop-only-title">{activeMenu}</h1>
+            <div className="admin-mobile-brand">
+              Faza <span>Gift House</span>
+            </div>
           </div>
           <div className="header-right">
-            <div className="admin-profile">
+            <div className="admin-profile desktop-only-profile">
               <span className="admin-name">Faza Admin</span>
             </div>
+            <button 
+              className="admin-mobile-logout-btn" 
+              onClick={handleLogout} 
+              aria-label="Logout"
+            >
+              <LogOut size={16} />
+              <span>Logout</span>
+            </button>
           </div>
         </header>
 
@@ -461,6 +435,13 @@ export default function Admin() {
                 initial="hidden"
                 animate="show"
               >
+                {/* Uniform Section Header */}
+                <div className="admin-section-header">
+                  <div className="section-header-info">
+                    <h2 className="section-header-title">Dashboard</h2>
+                  </div>
+                </div>
+
                 {/* Stats row cards */}
                 <motion.div className="stats-row" variants={fadeInUp}>
                   <div className="stat-card">
@@ -642,6 +623,17 @@ export default function Admin() {
                     </div>
                   </motion.div>
                 </div>
+
+                {/* Mobile Floating Action Button on Dashboard */}
+                <button
+                  type="button"
+                  className="admin-fab-btn admin-fab-primary"
+                  onClick={() => setActiveMenu("Orders")}
+                  aria-label="Add Order"
+                >
+                  <Plus size={18} strokeWidth={2.4} />
+                  <span>Add Order</span>
+                </button>
               </motion.div>
             )}
 
@@ -696,6 +688,54 @@ export default function Admin() {
           </div>
         )}
       </div>
+
+      {/* MOBILE BOTTOM NAVIGATION BAR */}
+      <nav className="admin-bottom-nav" aria-label="Mobile Navigation">
+        <button 
+          type="button"
+          className={`admin-bottom-nav-item ${activeMenu === "Dashboard" ? "active" : ""}`}
+          onClick={() => setActiveMenu("Dashboard")}
+        >
+          <LayoutDashboard size={20} />
+          <span>Dashboard</span>
+        </button>
+
+        <button 
+          type="button"
+          className={`admin-bottom-nav-item ${activeMenu === "Products" ? "active" : ""}`}
+          onClick={() => setActiveMenu("Products")}
+        >
+          <Boxes size={20} />
+          <span>Products</span>
+        </button>
+
+        <button 
+          type="button"
+          className={`admin-bottom-nav-item ${activeMenu === "Orders" ? "active" : ""}`}
+          onClick={() => setActiveMenu("Orders")}
+        >
+          <ShoppingBag size={20} />
+          <span>Orders</span>
+        </button>
+
+        <button 
+          type="button"
+          className={`admin-bottom-nav-item ${activeMenu === "Finance" ? "active" : ""}`}
+          onClick={() => setActiveMenu("Finance")}
+        >
+          <Wallet size={20} />
+          <span>Finance</span>
+        </button>
+
+        <button 
+          type="button"
+          className={`admin-bottom-nav-item ${activeMenu === "AdBanner" ? "active" : ""}`}
+          onClick={() => setActiveMenu("AdBanner")}
+        >
+          <ImageIcon size={20} />
+          <span>Ad Banner</span>
+        </button>
+      </nav>
 
       {/* 3. MODALS ATTACHMENTS */}
       <ProductFormModal

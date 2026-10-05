@@ -12,7 +12,8 @@ import {
   Phone,
   MapPin,
   Calendar,
-  Eye
+  Eye,
+  AlertCircle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { AdminProduct } from "./ProductPreviewModal";
@@ -33,6 +34,7 @@ export interface OrderItem {
 
 export interface Order {
   id: string;
+  dbUuid?: string;
   customerName: string;
   customerPhone: string;
   customerAddress: string;
@@ -77,6 +79,7 @@ export default function AdminOrders({
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [invoiceOrder, setInvoiceOrder] = useState<Order | null>(null);
+  const [paymentModalOrder, setPaymentModalOrder] = useState<Order | null>(null);
 
   // Toast notification state
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -94,21 +97,38 @@ export default function AdminOrders({
     }, 2500);
   };
 
-  // Mark as Paid handler (syncs payment status, full amount, and finance income)
-  const handleMarkAsPaid = (order: Order) => {
+  // Open payment modal
+  const handleOpenPaymentModal = (order: Order) => {
+    setPaymentModalOrder(order);
+  };
+
+  // Confirm payment amount from modal
+  const handleConfirmPayment = (newPaidAmount: number) => {
+    if (!paymentModalOrder) return;
+    const order = paymentModalOrder;
+    const validatedPaid = Math.min(newPaidAmount, order.grandTotal);
+    const validatedPending = Math.max(0, order.grandTotal - validatedPaid);
+    const validatedPaymentStatus: "Paid" | "Partial" | "Pending" =
+      validatedPending === 0
+        ? "Paid"
+        : (validatedPaid > 0 ? "Partial" : "Pending");
+
     const updated: Order = {
       ...order,
-      payment: "Paid",
-      paidAmount: order.grandTotal,
-      pendingAmount: 0
+      paidAmount: validatedPaid,
+      pendingAmount: validatedPending,
+      payment: validatedPaymentStatus
     };
+
     setSelectedOrder(updated);
     onEditOrder(updated);
-    setToastMessage(`Order #${order.id} marked as Paid!`);
+    setPaymentModalOrder(null);
+    setToastMessage(`Payment of ₹${validatedPaid.toLocaleString("en-IN")} recorded for Order #${order.id}!`);
     setTimeout(() => {
       setToastMessage(null);
     }, 3000);
   };
+
 
   // Revert to Pending handler
   const handleMarkAsPending = (order: Order) => {
@@ -225,9 +245,22 @@ export default function AdminOrders({
         )}
       </AnimatePresence>
 
+      {/* Uniform Section Header */}
+      <div className="admin-section-header">
+        <div className="section-header-info">
+          <h2 className="section-header-title">Orders</h2>
+        </div>
+        <div className="section-header-actions">
+          <button type="button" className="btn btn-green add-order-btn desktop-add-btn" onClick={handleAddClick}>
+            <Plus size={16} />
+            <span>Add Order</span>
+          </button>
+        </div>
+      </div>
+
       {/* Toolbar controls */}
       <div className="orders-toolbar">
-        {/* Search and Add Order in one line */}
+        {/* Full-width Search Bar */}
         <div className="toolbar-search-row">
           <div className="search-bar-wrapper">
             <Search size={18} className="search-icon" />
@@ -243,11 +276,6 @@ export default function AdminOrders({
               </button>
             )}
           </div>
-
-          <button className="btn btn-green add-order-btn" onClick={handleAddClick}>
-            <Plus size={16} />
-            <span>Add Order</span>
-          </button>
         </div>
 
         {/* Filters grid */}
@@ -550,10 +578,10 @@ export default function AdminOrders({
                     <button
                       type="button"
                       className="btn btn-mark-paid-primary"
-                      onClick={() => handleMarkAsPaid(selectedOrder)}
+                      onClick={() => handleOpenPaymentModal(selectedOrder)}
                     >
                       <CheckCircle2 size={18} />
-                      <span>Mark as Paid (₹{selectedOrder.pendingAmount > 0 ? selectedOrder.pendingAmount : selectedOrder.grandTotal})</span>
+                      <span>{selectedOrder.payment === "Partial" ? "Record Payment" : "Mark as Paid"}</span>
                     </button>
                   ) : (
                     <div className="paid-confirmed-bar">
@@ -561,14 +589,26 @@ export default function AdminOrders({
                         <CheckCircle2 size={15} />
                         <span>Payment Received (₹{selectedOrder.grandTotal.toLocaleString("en-IN")})</span>
                       </div>
-                      <button
-                        type="button"
-                        className="btn-unmark-link"
-                        onClick={() => handleMarkAsPending(selectedOrder)}
-                        title="Revert payment status to Pending"
-                      >
-                        Revert to Pending
-                      </button>
+                      <div className="paid-actions-group" style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                        <button
+                          type="button"
+                          className="btn-unmark-link"
+                          style={{ color: "var(--primary-color)", fontWeight: 600 }}
+                          onClick={() => handleOpenPaymentModal(selectedOrder)}
+                          title="Edit payment amount"
+                        >
+                          Edit
+                        </button>
+                        <span style={{ color: "rgba(0,0,0,0.2)" }}>•</span>
+                        <button
+                          type="button"
+                          className="btn-unmark-link"
+                          onClick={() => handleMarkAsPending(selectedOrder)}
+                          title="Revert payment status to Pending"
+                        >
+                          Revert to Pending
+                        </button>
+                      </div>
                     </div>
                   )}
 
@@ -631,8 +671,41 @@ export default function AdminOrders({
         <InvoiceModal
           order={invoiceOrder}
           onClose={() => setInvoiceOrder(null)}
+          onSaveOrder={(updated) => {
+            onEditOrder(updated);
+            setInvoiceOrder(updated);
+            if (selectedOrder && selectedOrder.id === updated.id) {
+              setSelectedOrder(updated);
+            }
+            setToastMessage(`Invoice changes saved to Order #${updated.id}!`);
+            setTimeout(() => {
+              setToastMessage(null);
+            }, 3000);
+          }}
         />
       )}
+
+      {/* Record Payment Modal */}
+      <AnimatePresence>
+        {paymentModalOrder && (
+          <RecordPaymentModal
+            order={paymentModalOrder}
+            onClose={() => setPaymentModalOrder(null)}
+            onConfirm={handleConfirmPayment}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Mobile Floating Action Button */}
+      <button 
+        type="button"
+        className="admin-fab-btn admin-fab-primary"
+        onClick={handleAddClick}
+        aria-label="Add Order"
+      >
+        <Plus size={18} strokeWidth={2.4} />
+        <span>Add Order</span>
+      </button>
 
     </div>
   );
@@ -1416,6 +1489,141 @@ function OrderFormModal({ order, products, orders, onClose, onSave }: OrderFormM
           )}
         </AnimatePresence>
 
+      </motion.div>
+    </div>
+  );
+}
+
+// Custom minimal modal to enter payment amount with total validation
+interface RecordPaymentModalProps {
+  order: Order;
+  onClose: () => void;
+  onConfirm: (amount: number) => void;
+}
+
+function RecordPaymentModal({ order, onClose, onConfirm }: RecordPaymentModalProps) {
+  // Pre-fill with pending amount if > 0, otherwise grandTotal
+  const defaultAmount = order.pendingAmount > 0 ? order.pendingAmount : order.grandTotal;
+  const [amountStr, setAmountStr] = useState<string>(String(defaultAmount));
+
+  const parsedAmount = parseFloat(amountStr);
+  const isInvalid = isNaN(parsedAmount) || parsedAmount < 0;
+  const isExceeded = !isNaN(parsedAmount) && parsedAmount > order.grandTotal;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isInvalid || isExceeded) return;
+    onConfirm(parsedAmount);
+  };
+
+  return (
+    <div className="payment-modal-backdrop" onClick={onClose}>
+      <motion.div
+        className="payment-modal-card"
+        initial={{ opacity: 0, scale: 0.95, y: 16 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 16 }}
+        transition={{ type: "spring", duration: 0.35, bounce: 0.08 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="payment-modal-header">
+          <div className="payment-modal-header-left">
+            <div className="payment-modal-icon-badge">
+              <CheckCircle2 size={22} />
+            </div>
+            <div>
+              <h3 className="payment-modal-title">Mark as Paid</h3>
+              <p className="payment-modal-subtitle">
+                Order <span className="mono-code">#{order.id}</span> • {order.customerName}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="payment-modal-close-btn"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Body Form */}
+        <form onSubmit={handleSubmit} className="payment-modal-body">
+          {/* Total Amount Display Banner */}
+          <div className="payment-total-banner">
+            <div className="payment-total-row">
+              <span className="payment-total-label">Total Order Amount</span>
+              <span className="payment-total-value">
+                ₹{order.grandTotal.toLocaleString("en-IN")}
+              </span>
+            </div>
+            {order.paidAmount > 0 && (
+              <div className="payment-meta-row">
+                <span className="payment-meta-item">
+                  Paid so far: <strong>₹{order.paidAmount.toLocaleString("en-IN")}</strong>
+                </span>
+                <span className="payment-meta-item">
+                  Pending: <strong>₹{order.pendingAmount.toLocaleString("en-IN")}</strong>
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Amount Input */}
+          <div className="payment-input-group">
+            <div className="payment-input-header">
+              <label htmlFor="payment-amount-input">Enter Amount (₹) *</label>
+            </div>
+
+            <div className="payment-input-wrapper">
+              <span className="payment-input-symbol">₹</span>
+              <input
+                id="payment-amount-input"
+                type="number"
+                value={amountStr}
+                onChange={(e) => setAmountStr(e.target.value)}
+                placeholder="0"
+                min="0"
+                max={order.grandTotal}
+                step="any"
+                required
+                autoFocus
+                className={isExceeded ? "input-error" : ""}
+              />
+            </div>
+
+            {/* Validation / Status preview */}
+            {isExceeded && (
+              <div className="payment-feedback-msg error">
+                <AlertCircle size={14} />
+                <span>Amount cannot exceed total order amount (₹{order.grandTotal.toLocaleString("en-IN")})</span>
+              </div>
+            )}
+
+
+          </div>
+
+          {/* Footer Actions */}
+          <div className="payment-modal-footer">
+            <button
+              type="button"
+              className="btn-payment-cancel"
+              onClick={onClose}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="btn-payment-confirm"
+              disabled={isInvalid || isExceeded}
+            >
+              <CheckCircle2 size={16} />
+              <span>Confirm Payment</span>
+            </button>
+          </div>
+        </form>
       </motion.div>
     </div>
   );

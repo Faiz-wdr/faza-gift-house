@@ -46,13 +46,13 @@ export default function Hero() {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 25 },
-    show: { 
-      opacity: 1, 
-      y: 0, 
-      transition: { 
-        duration: 0.8, 
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.8,
         ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
-      } 
+      }
     },
   };
 
@@ -66,28 +66,29 @@ export default function Hero() {
   return (
     <header id="home" className="hero-section">
       <div className="container hero-container">
-        <motion.div 
+        <motion.div
           className="hero-content-centered"
           variants={containerVariants}
           initial="hidden"
           animate="show"
         >
-          {/* Centered Main Title */}
+          {/* Centered Main Title (3 lines in mobile) */}
           <motion.h1 className="hero-title" variants={itemVariants}>
-            A place to celebrate your <br className="hero-title-br" />
+            A place to <br className="hero-title-br-mobile" />
+            celebrate your <br className="hero-title-br" />
             <span className="hero-highlight">masterpiece.</span>
           </motion.h1>
 
           {/* CTA Buttons after Hero heading */}
           <motion.div className="hero-actions" variants={itemVariants}>
-            <button 
+            <button
               className="btn-hero-primary"
               onClick={() => handleScrollToSection("products")}
               id="hero-browse-products-btn"
             >
-              Explore Catalog
+              Mementos
             </button>
-            <button 
+            <button
               className="btn-hero-secondary"
               onClick={() => handleScrollToSection("contact")}
               id="hero-contact-us-btn"
@@ -105,10 +106,10 @@ export default function Hero() {
                   className={`hero-fanned-card card-${idx + 1}`}
                   initial={{ opacity: 0, y: 35, rotate: 0 }}
                   animate={{ opacity: 1, y: card.yOffset, rotate: card.rotation }}
-                  transition={{ 
-                    duration: 0.75, 
-                    delay: 0.15 + idx * 0.08, 
-                    ease: [0.16, 1, 0.3, 1] 
+                  transition={{
+                    duration: 0.75,
+                    delay: 0.15 + idx * 0.08,
+                    ease: [0.16, 1, 0.3, 1]
                   }}
                   whileHover={{
                     y: -16,
@@ -128,10 +129,10 @@ export default function Hero() {
                   }}
                 >
                   <div className="card-image-frame">
-                    <img 
-                      src={card.src} 
-                      alt={card.title} 
-                      className="card-media-img" 
+                    <img
+                      src={card.src}
+                      alt={card.title}
+                      className="card-media-img"
                       loading={idx === 0 ? "eager" : "lazy"}
                     />
                   </div>

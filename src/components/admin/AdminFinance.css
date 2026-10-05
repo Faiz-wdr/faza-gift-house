@@ -1422,6 +1422,89 @@
   .bar-track {
     width: 40px;
   }
+
+  .finance-card {
+    padding: 1rem 1.15rem;
+    gap: 0.85rem;
+  }
+
+  .finance-card-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .finance-card-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .finance-card-value {
+    font-size: 1.35rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .finance-dashboard-container,
+  .finance-table-view-container {
+    gap: 10px !important;
+  }
+
+  .finance-dashboard-container .admin-section-header,
+  .finance-table-view-container .admin-section-header {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    padding-bottom: 8px !important;
+    margin-bottom: 0px !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+  }
+
+  .finance-dashboard-container .section-header-title,
+  .finance-table-view-container .section-header-title,
+  .finance-title-group h2 {
+    font-family: var(--font-body) !important;
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    color: var(--text-dark) !important;
+    letter-spacing: -0.015em !important;
+    line-height: 1.25 !important;
+    margin: 0 !important;
+  }
+
+  .finance-dashboard-container .section-header-subtitle,
+  .finance-table-view-container .section-header-subtitle {
+    display: none !important;
+  }
+
+  /* Finance Table Full Responsive Scrolling */
+  .finance-table-wrapper {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(125, 4, 75, 0.25) transparent !important;
+  }
+
+  .finance-table-wrapper::-webkit-scrollbar {
+    display: block !important;
+    height: 4px !important;
+  }
+
+  .finance-table-wrapper::-webkit-scrollbar-thumb {
+    background-color: rgba(125, 4, 75, 0.25) !important;
+    border-radius: 4px !important;
+  }
+
+  .finance-data-table {
+    min-width: 640px !important;
+  }
+
+  .finance-data-table th,
+  .finance-data-table td {
+    white-space: nowrap !important;
+  }
 }
 
 @media (max-width: 600px) {
@@ -1432,6 +1515,8 @@
 
   .month-selector-wrapper {
     justify-content: space-between;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .month-label-text {
@@ -1439,12 +1524,7 @@
   }
 
   .finance-action-buttons-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .btn-finance-action {
-    width: 100%;
+    display: none !important;
   }
 
   .chart-takeaway-strip {

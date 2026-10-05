@@ -10,10 +10,10 @@
 }
 
 .testimonials-title {
-  font-size: clamp(2.2rem, 3.5vw, 3rem);
+  font-size: clamp(1.85rem, 2.8vw, 2.4rem);
   color: var(--primary-color);
-  font-weight: 800;
-  letter-spacing: -0.01em;
+  font-weight: 700;
+  letter-spacing: -0.015em;
 }
 
 /* Grid Layout */
@@ -118,17 +118,23 @@
 
 @media (max-width: 768px) {
   .testimonials-section {
-    padding: 4.5rem 0;
+    padding: 3.5rem 0;
   }
 
   .testimonials-header {
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
+  }
+
+  .testimonials-title {
+    font-size: 1.55rem !important;
+    font-weight: 700 !important;
+    line-height: 1.25 !important;
   }
 }
 
 @media (max-width: 360px) {
   .testimonials-title {
-    font-size: clamp(1.8rem, 6vw, 2.2rem);
+    font-size: 1.4rem !important;
   }
 
   .testimonial-card {

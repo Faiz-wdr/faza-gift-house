@@ -256,32 +256,33 @@ export default function AdminProducts({
 
   return (
     <div className="admin-products-container">
-      {/* Catalog Header Sub-row */}
+      {/* Uniform Section Header */}
       <motion.div 
-        className="products-list-header"
+        className="admin-section-header"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
+        transition={{ duration: 0.3 }}
       >
-        <div className="header-text">
-          <h3>Catalog Management</h3>
+        <div className="section-header-info">
+          <h2 className="section-header-title">Products</h2>
         </div>
         
-        <div className="products-actions-group">
+        <div className="section-header-actions products-actions-group">
           {/* CSV Export Button */}
           <button 
+            type="button"
             className="btn btn-secondary btn-csv-export" 
             onClick={() => exportToCSV(products)}
             title="Export products list as CSV"
             disabled={uploadingCSV}
           >
-            <Download size={16} />
+            <Download size={15} />
             <span>Export CSV</span>
           </button>
           
           {/* CSV Import Button */}
           <label className={`btn btn-secondary btn-csv-import ${uploadingCSV ? "disabled" : ""}`} title="Upload products via CSV">
-            {uploadingCSV ? <Loader2 size={16} className="spinner-icon" /> : <Upload size={16} />}
+            {uploadingCSV ? <Loader2 size={15} className="spinner-icon" /> : <Upload size={15} />}
             <span>{uploadingCSV ? "Importing..." : "Import CSV"}</span>
             <input 
               type="file" 
@@ -292,13 +293,15 @@ export default function AdminProducts({
             />
           </label>
 
+          {/* Desktop Add Product Button (hidden on mobile, replaced by floating FAB) */}
           <button 
-            className="btn btn-green btn-add-product" 
+            type="button"
+            className="btn btn-green btn-add-product desktop-add-btn" 
             onClick={onAddClick}
             id="admin-add-product-btn"
             disabled={uploadingCSV}
           >
-            <Plus size={18} />
+            <Plus size={16} />
             <span>Add Product</span>
           </button>
         </div>
@@ -322,6 +325,18 @@ export default function AdminProducts({
           />
         ))}
       </motion.div>
+
+      {/* Mobile Floating Action Button */}
+      <button 
+        type="button"
+        className="admin-fab-btn admin-fab-primary"
+        onClick={onAddClick}
+        disabled={uploadingCSV}
+        aria-label="Add Product"
+      >
+        <Plus size={18} strokeWidth={2.4} />
+        <span>Add Product</span>
+      </button>
     </div>
   );
 }

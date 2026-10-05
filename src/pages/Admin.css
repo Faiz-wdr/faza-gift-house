@@ -234,64 +234,6 @@
   color: #C53030;
 }
 
-/* DB Connection Status Indicator */
-.db-status-indicator {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.65rem 0.85rem;
-  background-color: rgba(125, 4, 75, 0.03);
-  border-radius: var(--radius-sm);
-  border: 1px solid rgba(125, 4, 75, 0.06);
-  margin-bottom: 0.8rem;
-  box-sizing: border-box;
-}
-
-.status-dot-row {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-
-.status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background-color: #10B981;
-  display: inline-block;
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
-  flex-shrink: 0;
-}
-
-.status-dot.error {
-  background-color: #EF4444;
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
-}
-
-.status-label {
-  font-size: 0.76rem;
-  font-weight: 600;
-  color: var(--primary-color);
-  line-height: 1;
-}
-
-.last-ping-lbl {
-  font-size: 0.68rem;
-  color: var(--text-muted);
-}
-
-/* Drawer overlay backdrop */
-.sidebar-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(20, 20, 20, 0.35);
-  backdrop-filter: blur(4px);
-  z-index: 145;
-}
-
 /* 2. MAIN DASHBOARD CONTENT AREA */
 .admin-main {
   flex-grow: 1;
@@ -364,6 +306,27 @@
   font-weight: 600;
   color: var(--text-dark);
   letter-spacing: -0.01em;
+}
+
+/* Mobile Header and Bottom Nav Visibility on Desktop */
+.admin-mobile-brand {
+  display: none;
+}
+
+.admin-mobile-logout-btn {
+  display: none;
+}
+
+.admin-bottom-nav {
+  display: none;
+}
+
+.desktop-only-title {
+  display: block;
+}
+
+.desktop-only-profile {
+  display: flex;
 }
 
 .admin-avatar {
@@ -800,120 +763,514 @@
   }
 }
 
-/* MOBILE LAYOUT: Sidebar becomes sliding drawer drawer */
+/* MOBILE LAYOUT: Bottom Bar Navigation + Mobile Top Header */
 @media (max-width: 768px) {
+  /* Completely hide sidebar and drawer elements on mobile */
   .admin-sidebar {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: -260px;
-    /* Hidden offscreen on left */
-    width: 260px;
-    z-index: 210;
-    box-shadow: none;
+    display: none !important;
   }
 
-  .admin-sidebar.drawer-open {
-    left: 0;
-    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.15);
+  .sidebar-overlay {
+    display: none !important;
   }
 
-  .sidebar-header {
-    justify-content: space-between;
-    padding: 0 1.5rem;
-  }
-
-  .sidebar-logo span {
-    display: inline;
-  }
-
-  .sidebar-close-btn {
-    display: flex;
-  }
-
-  .sidebar-menu {
-    padding: 1.8rem 1rem;
-    align-items: stretch;
-  }
-
-  .menu-item {
-    justify-content: flex-start;
-    padding: 0.75rem 1rem;
-    width: auto;
-    height: auto;
-  }
-
-  .menu-item .menu-text {
-    display: inline;
-  }
-
-  .menu-item.disabled .badge-lock {
-    display: inline;
-  }
-
-  .sidebar-footer {
-    padding: 1.2rem 1rem;
-  }
-
-  /* Hamburger trigger header */
   .hamburger-btn {
-    display: flex;
-    padding: 0;
-    margin: 0;
-    align-items: center;
-    justify-content: center;
+    display: none !important;
   }
 
+  .desktop-only-title {
+    display: none !important;
+  }
+
+  .desktop-only-profile {
+    display: none !important;
+  }
+
+  /* Mobile Top Header: "Faza Gift House" left, Logout right */
   .admin-header {
-    height: 70px;
-    padding: 0 1.5rem;
+    height: 56px;
+    padding: 0 16px;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+    background-color: var(--white);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
   }
 
-  .admin-page-title {
-    font-size: 1.25rem;
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .admin-mobile-brand {
+    display: inline-flex;
+    align-items: baseline;
+    font-family: var(--font-heading) !important;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    letter-spacing: -0.01em;
+    user-select: none;
+    white-space: nowrap;
+    flex-shrink: 0;
     line-height: 1.2;
   }
 
-  .admin-name {
-    display: none;
+  .admin-mobile-brand span {
+    font-weight: 400;
+    font-style: italic;
+    color: var(--text-dark);
+    margin-left: 0.28rem;
+    white-space: nowrap;
+  }
+
+  .admin-mobile-logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 6px 12px;
+    border-radius: 6px;
+    background-color: #FEF2F2;
+    color: #DC2626;
+    border: 1px solid rgba(220, 38, 38, 0.16);
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(220, 38, 38, 0.04);
+  }
+
+  .admin-mobile-logout-btn:active {
+    background-color: #FEE2E2;
+    color: #B91C1C;
+    transform: scale(0.97);
+  }
+
+  /* Fixed Bottom Navigation Bar - Standard 56px height */
+  .admin-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    height: calc(56px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background-color: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.04);
+    z-index: 100;
+    align-items: stretch;
+    justify-content: space-around;
+  }
+
+  .admin-bottom-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 4px 0;
+    background: transparent;
+    border: none;
+    color: #64748B;
+    font-family: var(--font-body);
+    font-size: 0.68rem;
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.15s ease, transform 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .admin-bottom-nav-item svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 1.8px;
+    transition: all 0.15s ease;
+  }
+
+  .admin-bottom-nav-item.active {
+    color: var(--primary-color);
+    font-weight: 600;
+  }
+
+  .admin-bottom-nav-item.active svg {
+    stroke-width: 2.2px;
+    transform: translateY(-1px);
+  }
+
+  .admin-bottom-nav-item.active::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 2.5px;
+    background-color: var(--primary-color);
+    border-radius: 0 0 3px 3px;
+  }
+
+  /* Content padding for bottom navigation bar */
+  .admin-main {
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .dashboard-view-wrapper {
+    padding-bottom: calc(75px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   .dashboard-content {
-    padding: 1.5rem;
-    gap: 1.8rem;
+    padding: 12px !important;
+    gap: 10px !important;
     max-width: 100%;
     box-sizing: border-box;
   }
 
-  .stats-row {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+  .admin-products-container,
+  .admin-orders-container,
+  .finance-dashboard-container,
+  .finance-table-view-container,
+  .admin-ad-banner-container {
+    gap: 10px !important;
   }
 
   .recent-orders-container {
-    padding: 1.5rem;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    background: #FFFFFF;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    gap: 10px !important;
+  }
+
+  /* Section Header on Mobile - compact & strictly uniform */
+  .admin-section-header {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    padding-bottom: 8px !important;
+    margin-bottom: 0px !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+  }
+
+  .section-header-info {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .section-header-title,
+  .admin-section-header h2,
+  .admin-layout .section-header-title {
+    font-family: var(--font-body) !important;
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    color: var(--text-dark) !important;
+    letter-spacing: -0.015em !important;
+    line-height: 1.25 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .section-header-subtitle {
+    display: none !important;
+  }
+
+  .section-header-actions {
+    width: auto;
+  }
+
+  .section-header-actions:empty {
+    display: none !important;
+  }
+
+  .desktop-add-btn {
+    display: none !important;
+  }
+
+  /* Tables responsive horizontal scroll with visible scrollbar */
+  .table-responsive {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(125, 4, 75, 0.25) transparent !important;
+  }
+
+  .table-responsive::-webkit-scrollbar {
+    display: block !important;
+    height: 4px !important;
+  }
+
+  .table-responsive::-webkit-scrollbar-thumb {
+    background-color: rgba(125, 4, 75, 0.25) !important;
+    border-radius: 4px !important;
+  }
+
+  .dashboard-tables-grid .orders-table {
+    min-width: 580px !important;
+  }
+
+  .dashboard-tables-grid .orders-table th,
+  .dashboard-tables-grid .orders-table td {
+    white-space: nowrap !important;
+  }
+
+  .dashboard-tables-grid .col-customer,
+  .dashboard-tables-grid .col-product {
+    max-width: none !important;
+    white-space: nowrap !important;
+    text-overflow: clip !important;
+  }
+
+  /* Stats row in 2 clean columns on mobile */
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .stat-card {
+    padding: 12px 14px !important;
+    gap: 10px !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+    background-color: #FFFFFF;
+  }
+
+  .stat-card-icon {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 8px !important;
+  }
+
+  .stat-card-icon svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .stat-number {
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    color: var(--text-dark);
+    letter-spacing: -0.02em !important;
+  }
+
+  .stat-label {
+    font-size: 0.74rem !important;
+    font-weight: 500 !important;
+    color: #64748B !important;
+  }
+
+  /* Centered Single Floating Action Button */
+  .admin-fab-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    position: fixed;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    bottom: calc(66px + env(safe-area-inset-bottom, 0px));
+    z-index: 95;
+    padding: 0.65rem 1.45rem;
+    border-radius: 9999px;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    cursor: pointer;
+    text-decoration: none;
+    outline: none;
+    border: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease;
+  }
+
+  .admin-fab-btn:active {
+    transform: translateX(-50%) scale(0.96) !important;
+  }
+
+  /* Primary FAB (Burgundy Gradient) */
+  .admin-fab-primary {
+    background: linear-gradient(135deg, #7D044B 0%, #63033C 100%) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 4px 16px rgba(125, 4, 75, 0.35), 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  /* Secondary FAB (Clean White/Rose Pill for Expense) */
+  .admin-fab-secondary {
+    background: #FFFFFF !important;
+    color: #DC2626 !important;
+    border: 1.5px solid rgba(220, 38, 38, 0.3) !important;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  .admin-fab-secondary:active {
+    background: #FEF2F2 !important;
+  }
+
+  /* Centered Floating Action Button Group (Finance) */
+  .admin-fab-group {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: fixed;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    bottom: calc(66px + env(safe-area-inset-bottom, 0px));
+    z-index: 95;
+    width: auto;
+    max-width: calc(100vw - 32px);
+    white-space: nowrap;
+  }
+
+  .admin-fab-group .admin-fab-btn {
+    position: static !important;
+    left: auto !important;
+    transform: none !important;
+    padding: 0.62rem 1.15rem;
+    font-size: 0.82rem;
+  }
+
+  .admin-fab-group .admin-fab-btn:active {
+    transform: scale(0.96) !important;
+  }
+
+  /* Standard bottom clearance for scrolling content */
+  .dashboard-view-wrapper {
+    padding-bottom: calc(125px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
 
 @media (max-width: 480px) {
   .admin-header {
-    padding: 0 1rem;
+    height: 54px;
+    padding: 0 14px;
+  }
+
+  .admin-mobile-brand {
+    font-size: 1.1rem;
+    white-space: nowrap;
+  }
+
+  .admin-mobile-logout-btn {
+    padding: 5px 10px;
+    font-size: 0.78rem;
   }
 
   .dashboard-content {
-    padding: 1rem;
-    gap: 1.5rem;
+    padding: 10px 8px !important;
+    gap: 10px !important;
   }
 
   .stats-row {
-    gap: 0.8rem;
+    gap: 8px !important;
   }
 
   .stat-card {
-    padding: 1.2rem 1rem;
+    padding: 10px 12px !important;
+  }
+
+  .stat-number {
+    font-size: 1.2rem !important;
+  }
+
+  .stat-label {
+    font-size: 0.72rem !important;
   }
 
   .recent-orders-container {
-    padding: 1.2rem 1rem;
+    padding: 12px 14px;
   }
+
+  .admin-fab-btn {
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    padding: 0.62rem 1.35rem;
+    font-size: 0.82rem;
+  }
+
+  .admin-fab-group {
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    gap: 6px;
+  }
+
+  .admin-fab-group .admin-fab-btn {
+    padding: 0.58rem 0.95rem;
+    font-size: 0.78rem;
+  }
+}
+
+/* ==========================================================================
+   UNIFORM SECTION HEADER COMPONENT
+   Standardized title, subtitle, and action buttons across all views
+   ========================================================================== */
+.admin-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  flex-wrap: wrap;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.section-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.section-header-title {
+  font-family: var(--font-body) !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  color: var(--text-dark);
+  letter-spacing: -0.015em;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.section-header-subtitle {
+  display: none !important;
+}
+
+.section-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+/* Floating Action Button Base (hidden on desktop) */
+.admin-fab-btn {
+  display: none;
+}
+
+.admin-fab-group {
+  display: none;
 }

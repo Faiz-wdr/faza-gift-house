@@ -517,10 +517,28 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
 
       {viewMode === "overview" ? (
         <>
-          {/* 1. TOP HEADER (NO MONTH SELECTOR ON OVERVIEW) */}
-          <div className="finance-header-bar">
-            <div className="finance-title-group">
-              <h2>Finance Overview</h2>
+          {/* 1. TOP UNIFORM SECTION HEADER */}
+          <div className="admin-section-header">
+            <div className="section-header-info">
+              <h2 className="section-header-title">Finance</h2>
+            </div>
+            <div className="section-header-actions">
+              <button 
+                type="button" 
+                className="btn-finance-action btn-add-expense desktop-add-btn"
+                onClick={() => handleOpenAdd("expense")}
+              >
+                <Plus size={15} />
+                <span>Add Expense</span>
+              </button>
+              <button 
+                type="button" 
+                className="btn-finance-action btn-add-income desktop-add-btn"
+                onClick={() => handleOpenAdd("income")}
+              >
+                <Plus size={15} />
+                <span>Add Income</span>
+              </button>
             </div>
           </div>
 
@@ -808,41 +826,63 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
         /* TABLE VIEW (VIEW ALL FINANCE TABLE) */
         <div className="finance-table-view-container">
           {/* Top Navigation & Month Switcher */}
-          <div className="finance-header-bar table-view-header">
-            <button 
-              type="button" 
-              className="btn-finance-back" 
-              onClick={() => setViewMode("overview")}
-            >
-              <ArrowLeft size={17} />
-              <span>Back to Overview</span>
-            </button>
-
-            {/* Month Switcher for that month only */}
-            <div className="month-selector-wrapper">
+          <div className="admin-section-header">
+            <div className="section-header-info">
+              <h2 className="section-header-title">Monthly Financials</h2>
+            </div>
+            <div className="section-header-actions">
               <button 
                 type="button" 
-                className="month-nav-btn" 
-                onClick={handlePrevMonth}
-                title="Previous Month"
-                aria-label="Previous Month"
+                className="btn-finance-back" 
+                onClick={() => setViewMode("overview")}
               >
-                <ChevronLeft size={16} strokeWidth={2.5} />
+                <ArrowLeft size={16} />
+                <span>Back to Overview</span>
               </button>
-              
-              <div className="month-display-pill">
-                <Calendar size={15} className="month-icon" />
-                <span className="month-label-text">{monthLabel}</span>
+
+              {/* Month Switcher for that month only */}
+              <div className="month-selector-wrapper">
+                <button 
+                  type="button" 
+                  className="month-nav-btn" 
+                  onClick={handlePrevMonth}
+                  title="Previous Month"
+                  aria-label="Previous Month"
+                >
+                  <ChevronLeft size={16} strokeWidth={2.5} />
+                </button>
+                
+                <div className="month-display-pill">
+                  <Calendar size={15} className="month-icon" />
+                  <span className="month-label-text">{monthLabel}</span>
+                </div>
+
+                <button 
+                  type="button" 
+                  className="month-nav-btn" 
+                  onClick={handleNextMonth}
+                  title="Next Month"
+                  aria-label="Next Month"
+                >
+                  <ChevronRight size={16} strokeWidth={2.5} />
+                </button>
               </div>
 
               <button 
                 type="button" 
-                className="month-nav-btn" 
-                onClick={handleNextMonth}
-                title="Next Month"
-                aria-label="Next Month"
+                className="btn-finance-action btn-add-expense desktop-add-btn"
+                onClick={() => handleOpenAdd("expense")}
               >
-                <ChevronRight size={16} strokeWidth={2.5} />
+                <Plus size={15} />
+                <span>Add Expense</span>
+              </button>
+              <button 
+                type="button" 
+                className="btn-finance-action btn-add-income desktop-add-btn"
+                onClick={() => handleOpenAdd("income")}
+              >
+                <Plus size={15} />
+                <span>Add Income</span>
               </button>
             </div>
           </div>
@@ -1232,6 +1272,28 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Mobile Floating Action Button Group: Income (Primary) & Expense (Secondary) */}
+      <div className="admin-fab-group">
+        <button 
+          type="button" 
+          className="admin-fab-btn admin-fab-secondary"
+          onClick={() => handleOpenAdd("expense")}
+          aria-label="Add Expense"
+        >
+          <Plus size={16} strokeWidth={2.4} />
+          <span>Add Expense</span>
+        </button>
+        <button 
+          type="button" 
+          className="admin-fab-btn admin-fab-primary"
+          onClick={() => handleOpenAdd("income")}
+          aria-label="Add Income"
+        >
+          <Plus size={16} strokeWidth={2.4} />
+          <span>Add Income</span>
+        </button>
+      </div>
     </div>
   );
 }

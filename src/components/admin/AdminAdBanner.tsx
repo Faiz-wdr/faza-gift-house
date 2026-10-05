@@ -154,15 +154,18 @@ export default function AdminAdBanner() {
         )}
       </AnimatePresence>
 
-      <div className="banner-page-header">
-        <div>
-          <h2>Ad Banner Settings</h2>
+      {/* Uniform Section Header */}
+      <div className="admin-section-header">
+        <div className="section-header-info">
+          <h2 className="section-header-title">Ad Banner</h2>
         </div>
         {banners.length > 0 && (
-          <button className="btn-restore-defaults" onClick={handleRestoreDefaults}>
-            <RefreshCw size={14} />
-            <span>Restore Defaults</span>
-          </button>
+          <div className="section-header-actions">
+            <button type="button" className="btn-restore-defaults" onClick={handleRestoreDefaults}>
+              <RefreshCw size={14} />
+              <span>Restore Defaults</span>
+            </button>
+          </div>
         )}
       </div>
 
