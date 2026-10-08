@@ -453,6 +453,8 @@
     grid-template-columns: 1fr;
     gap: 1.8rem;
   }
+}
+
 @media (max-width: 768px) {
   .admin-ad-banner-container {
     gap: 10px !important;
