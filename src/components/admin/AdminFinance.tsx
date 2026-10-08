@@ -237,9 +237,20 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
       isSelected: boolean;
     }> = [];
 
-    // 8 months so user sees 4 in view and can scroll back for 4 earlier ones
+    // Anchor the 8-month window so clicking nodes within the window doesn't unexpectedly slide the graph
+    const now = new Date();
+    let anchor = now;
+    const monthsDiff =
+      (now.getFullYear() - currentDate.getFullYear()) * 12 +
+      (now.getMonth() - currentDate.getMonth());
+    if (monthsDiff < 0) {
+      anchor = currentDate;
+    } else if (monthsDiff >= 8) {
+      anchor = new Date(currentDate.getFullYear(), currentDate.getMonth() + 2, 1);
+    }
+
     for (let i = 7; i >= 0; i--) {
-      const d = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+      const d = new Date(anchor.getFullYear(), anchor.getMonth() - i, 1);
       const y = d.getFullYear();
       const m = String(d.getMonth() + 1).padStart(2, "0");
       const key = `${y}-${m}`;
@@ -269,7 +280,16 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
   const maxMonthlyValue = useMemo(() => {
     const allVals = monthlyComparisonData.flatMap((m) => [m.income, m.expense]);
     const maxVal = Math.max(...allVals, 0);
-    return maxVal > 0 ? maxVal : 1000;
+    if (maxVal <= 0) return 1000;
+    const magnitude = Math.pow(10, Math.floor(Math.log10(maxVal)));
+    const ratio = maxVal / magnitude;
+    let roundedMultiplier = 1;
+    if (ratio <= 1) roundedMultiplier = 1;
+    else if (ratio <= 2) roundedMultiplier = 2;
+    else if (ratio <= 2.5) roundedMultiplier = 2.5;
+    else if (ratio <= 5) roundedMultiplier = 5;
+    else roundedMultiplier = 10;
+    return Math.ceil(roundedMultiplier * magnitude);
   }, [monthlyComparisonData]);
 
   // Comparison with previous month
@@ -285,13 +305,126 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
     return null;
   }, [monthlyComparisonData, monthlyIncome]);
 
-  // Chart scroll container ref - auto scroll to rightmost (latest) month
-  const chartScrollRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (chartScrollRef.current) {
-      chartScrollRef.current.scrollLeft = chartScrollRef.current.scrollWidth;
+  // Hovered node state for the line graph
+  const [hoveredMonthIndex, setHoveredMonthIndex] = useState<number | null>(null);
+
+  // Line Graph SVG coordinates
+  const SVG_WIDTH = 520;
+  const SVG_HEIGHT = 190;
+  const PADDING_LEFT = 44;
+  const PADDING_RIGHT = 22;
+  const PADDING_TOP = 22;
+  const PADDING_BOTTOM = 30;
+  const PLOT_WIDTH = SVG_WIDTH - PADDING_LEFT - PADDING_RIGHT; // 454
+  const PLOT_HEIGHT = SVG_HEIGHT - PADDING_TOP - PADDING_BOTTOM; // 138
+  const BASELINE_Y = PADDING_TOP + PLOT_HEIGHT; // 160
+
+  const chartPoints = useMemo(() => {
+    const total = monthlyComparisonData.length;
+    if (total === 0) return [];
+
+    return monthlyComparisonData.map((item, idx) => {
+      const x =
+        total > 1
+          ? PADDING_LEFT + (idx / (total - 1)) * PLOT_WIDTH
+          : PADDING_LEFT + PLOT_WIDTH / 2;
+
+      const incClamped = Math.max(0, item.income);
+      const expClamped = Math.max(0, item.expense);
+      const profitClamped = Math.max(0, item.income - item.expense);
+
+      const yIncome =
+        BASELINE_Y -
+        (maxMonthlyValue > 0 ? (incClamped / maxMonthlyValue) * PLOT_HEIGHT : 0);
+      const yExpense =
+        BASELINE_Y -
+        (maxMonthlyValue > 0 ? (expClamped / maxMonthlyValue) * PLOT_HEIGHT : 0);
+      const yProfit =
+        BASELINE_Y -
+        (maxMonthlyValue > 0 ? (profitClamped / maxMonthlyValue) * PLOT_HEIGHT : 0);
+
+      return {
+        x,
+        yIncome,
+        yExpense,
+        yProfit,
+        profit: item.income - item.expense,
+        item,
+        index: idx,
+      };
+    });
+  }, [monthlyComparisonData, maxMonthlyValue]);
+
+  // Smooth cubic bezier paths with monotonic clamping (never dips below 0 baseline)
+  const { incomeLinePath, incomeAreaPath, expenseLinePath, expenseAreaPath, profitLinePath } = useMemo(() => {
+    if (chartPoints.length === 0) {
+      return {
+        incomeLinePath: "",
+        incomeAreaPath: "",
+        expenseLinePath: "",
+        expenseAreaPath: "",
+        profitLinePath: "",
+      };
     }
-  }, [monthlyComparisonData, currentYearMonth]);
+
+    const getSmoothPath = (pts: Array<{ x: number; y: number }>) => {
+      if (pts.length === 0) return "";
+      if (pts.length === 1) return `M ${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}`;
+
+      let d = `M ${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}`;
+      for (let i = 0; i < pts.length - 1; i++) {
+        const p0 = pts[i === 0 ? 0 : i - 1];
+        const p1 = pts[i];
+        const p2 = pts[i + 1];
+        const p3 = pts[i + 2 < pts.length ? i + 2 : i + 1];
+
+        let cp1x = p1.x + (p2.x - p0.x) / 6;
+        let cp1y = p1.y + (p2.y - p0.y) / 6;
+        let cp2x = p2.x - (p3.x - p1.x) / 6;
+        let cp2y = p2.y - (p3.y - p1.y) / 6;
+
+        // Monotonic clamping: prevent dips below baseline or overshoots
+        if (p1.y === p2.y) {
+          cp1y = p1.y;
+          cp2y = p2.y;
+        } else {
+          const minY = Math.min(p1.y, p2.y);
+          const maxY = Math.max(p1.y, p2.y);
+          cp1y = Math.min(maxY, Math.max(minY, cp1y));
+          cp2y = Math.min(maxY, Math.max(minY, cp2y));
+        }
+
+        // Hard clamp at BASELINE_Y so it NEVER dips below 0 line
+        cp1y = Math.min(BASELINE_Y, Math.max(PADDING_TOP, cp1y));
+        cp2y = Math.min(BASELINE_Y, Math.max(PADDING_TOP, cp2y));
+
+        d += ` C ${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
+      }
+      return d;
+    };
+
+    const incPts = chartPoints.map((p) => ({ x: p.x, y: p.yIncome }));
+    const expPts = chartPoints.map((p) => ({ x: p.x, y: p.yExpense }));
+    const profitPts = chartPoints.map((p) => ({ x: p.x, y: p.yProfit }));
+
+    const incLine = getSmoothPath(incPts);
+    const expLine = getSmoothPath(expPts);
+    const profitLine = getSmoothPath(profitPts);
+
+    const firstX = chartPoints[0].x.toFixed(1);
+    const lastX = chartPoints[chartPoints.length - 1].x.toFixed(1);
+
+    const incArea = `${incLine} L ${lastX},${BASELINE_Y} L ${firstX},${BASELINE_Y} Z`;
+    const expArea = `${expLine} L ${lastX},${BASELINE_Y} L ${firstX},${BASELINE_Y} Z`;
+
+    return {
+      incomeLinePath: incLine,
+      incomeAreaPath: incArea,
+      expenseLinePath: expLine,
+      expenseAreaPath: expArea,
+      profitLinePath: profitLine,
+    };
+  }, [chartPoints]);
 
   // Close category suggestions when clicking outside
   useEffect(() => {
@@ -636,109 +769,351 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
             <div className="finance-section-card chart-section-card">
               <div className="section-card-header">
                 <h3 className="section-card-title">Monthly Comparison</h3>
-
-                <div className="chart-legend-group">
-                  <div className="chart-legend-badge">
-                    <span className="legend-dot income-dot"></span>
-                    <span>Income</span>
-                  </div>
-                  <div className="chart-legend-badge">
-                    <span className="legend-dot expense-dot"></span>
-                    <span>Expense</span>
-                  </div>
-                </div>
               </div>
 
-              {/* Minimal monthly income & expense comparison graph */}
+              {/* Minimal Line Graph for Monthly Comparison */}
               <div className="monthly-income-graph-container">
                 <div
-                  className="chart-scroll-wrapper"
-                  ref={chartScrollRef}
-                  title="Scroll left to view previous months"
+                  className="line-chart-wrapper"
+                  onMouseLeave={() => setHoveredMonthIndex(null)}
                 >
-                  <div className="chart-scroll-content">
-                    {monthlyComparisonData.map((item) => {
-                      const incomeVal = Number(item.income) || 0;
-                      const expenseVal = Number(item.expense) || 0;
-                      const maxVal = maxMonthlyValue > 0 ? maxMonthlyValue : 1000;
+                  {/* Floating Tooltip */}
+                  <AnimatePresence>
+                    {hoveredMonthIndex !== null && chartPoints[hoveredMonthIndex] && (() => {
+                      const activePoint = chartPoints[hoveredMonthIndex];
+                      const activeItem = activePoint.item;
+                      const isRightSide = activePoint.x > SVG_WIDTH * 0.52;
+                      const isFarLeft = activePoint.x < SVG_WIDTH * 0.22;
 
-                      const incomeHeightPct = Math.max(
-                        incomeVal > 0 ? Math.round((incomeVal / maxVal) * 100) : 4,
-                        incomeVal > 0 ? 8 : 4
-                      );
-                      const expenseHeightPct = Math.max(
-                        expenseVal > 0 ? Math.round((expenseVal / maxVal) * 100) : 4,
-                        expenseVal > 0 ? 8 : 4
+                      // Flip to left if on right side, flip to right if on far left, else center
+                      const transformX = isRightSide ? "-100%" : isFarLeft ? "0%" : "-50%";
+                      const leftPct = (activePoint.x / SVG_WIDTH) * 100;
+
+                      // Node highest point
+                      const nodeY = Math.min(
+                        activePoint.yIncome,
+                        activePoint.yExpense,
+                        activePoint.yProfit
                       );
 
-                      const formatShort = (val: number | undefined | null) => {
-                        const num = Number(val) || 0;
-                        if (num <= 0) return "₹0";
-                        if (num >= 100000) return `₹${(num / 1000).toFixed(1)}k`;
-                        return `₹${num.toLocaleString("en-IN")}`;
-                      };
+                      // If node is in upper portion (nodeY < 80px), placing above causes clipping;
+                      // position it downward so it stays comfortably inside the chart.
+                      // Otherwise, position it upward above the node/baseline.
+                      const isNearTop = nodeY < 80;
+                      const transformY = isNearTop ? "0%" : "-100%";
+                      const topPct = isNearTop
+                        ? Math.max(4, ((nodeY + 6) / SVG_HEIGHT) * 100)
+                        : (nodeY / SVG_HEIGHT) * 100;
 
                       return (
                         <div
-                          key={item.key}
-                          className={`monthly-bar-item ${item.isSelected ? "active-month" : ""}`}
-                          onClick={() => {
-                            setCurrentDate(item.date);
-                            setViewMode("table");
+                          className="line-chart-tooltip-anchor"
+                          style={{
+                            left: `${leftPct}%`,
+                            top: `${topPct}%`,
+                            transform: `translate(${transformX}, ${transformY})`,
+                            paddingRight: isRightSide ? "12px" : undefined,
+                            paddingLeft: isFarLeft ? "12px" : undefined,
+                            paddingBottom: !isNearTop ? "8px" : undefined,
+                            paddingTop: isNearTop ? "8px" : undefined,
                           }}
-                          title={`Click to view ${item.shortLabel} ${item.yearLabel} — Income: ₹${incomeVal.toLocaleString("en-IN")} | Expense: ₹${expenseVal.toLocaleString("en-IN")}`}
                         >
-                          <div className="bar-income-val">
-                            <div className="bar-split-vals">
-                              <span className="val-inc">{formatShort(incomeVal)}</span>
-                              {expenseVal > 0 && <span className="val-exp">{formatShort(expenseVal)}</span>}
-                            </div>
-                          </div>
-
-                          <div
-                            className="bar-single-track"
-                            title={`Income: ₹${incomeVal.toLocaleString("en-IN")} | Expense: ₹${expenseVal.toLocaleString("en-IN")}`}
+                          <motion.div
+                            className="line-chart-tooltip"
+                            initial={{ opacity: 0, scale: 0.94 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.94 }}
+                            transition={{ duration: 0.12 }}
                           >
-                            {/* Income Layer (Green) */}
-                            {incomeVal > 0 && (
-                              <motion.div
-                                className="bar-layer bar-layer-income"
-                                style={{
-                                  zIndex: incomeVal >= expenseVal ? 1 : 2,
-                                }}
-                                initial={{ height: 0 }}
-                                animate={{ height: `${incomeHeightPct}%` }}
-                                transition={{ duration: 0.45, ease: "easeOut" }}
-                              />
-                            )}
+                            <div className="chart-tooltip-header">
+                              <span className="tooltip-month-name">
+                                {activeItem.shortLabel} {activeItem.yearLabel}
+                              </span>
+                            </div>
 
-                            {/* Expense Layer (Red) */}
-                            {expenseVal > 0 && (
-                              <motion.div
-                                className="bar-layer bar-layer-expense"
-                                style={{
-                                  zIndex: expenseVal > incomeVal ? 1 : 2,
-                                }}
-                                initial={{ height: 0 }}
-                                animate={{ height: `${expenseHeightPct}%` }}
-                                transition={{ duration: 0.45, ease: "easeOut" }}
-                              />
-                            )}
+                            <div className="chart-tooltip-body">
+                              <div className="tooltip-stat-row">
+                                <div className="tooltip-stat-label">
+                                  <span className="tooltip-dot income-dot" />
+                                  <span>Income</span>
+                                </div>
+                                <span className="tooltip-stat-val text-income">
+                                  ₹{activeItem.income.toLocaleString("en-IN")}
+                                </span>
+                              </div>
 
-                            {/* Base indicator if both are 0 */}
-                            {incomeVal === 0 && expenseVal === 0 && (
-                              <div className="bar-layer-empty" />
-                            )}
-                          </div>
+                              <div className="tooltip-stat-row">
+                                <div className="tooltip-stat-label">
+                                  <span className="tooltip-dot expense-dot" />
+                                  <span>Expense</span>
+                                </div>
+                                <span className="tooltip-stat-val text-expense">
+                                  ₹{activeItem.expense.toLocaleString("en-IN")}
+                                </span>
+                              </div>
 
-                          <div className="bar-month-tag">
-                            <span className="month-name">{item.shortLabel}</span>
-                            {item.isSelected && <span className="active-dot" />}
-                          </div>
+                              <div className="tooltip-stat-divider" />
+
+                              <div className="tooltip-stat-row tooltip-net-row">
+                                <div className="tooltip-stat-label">
+                                  <span className="tooltip-dot profit-dot" />
+                                  <span>Net Profit</span>
+                                </div>
+                                <span
+                                  className={`tooltip-stat-val ${
+                                    activeItem.income - activeItem.expense >= 0
+                                      ? "text-income"
+                                      : "text-expense"
+                                  }`}
+                                >
+                                  {activeItem.income - activeItem.expense >= 0 ? "+" : ""}
+                                  ₹{(activeItem.income - activeItem.expense).toLocaleString("en-IN")}
+                                </span>
+                              </div>
+                            </div>
+                          </motion.div>
                         </div>
                       );
+                    })()}
+                  </AnimatePresence>
+
+                  {/* SVG Line Graph */}
+                  <svg
+                    viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
+                    className="monthly-line-chart-svg"
+                    preserveAspectRatio="xMidYMid meet"
+                  >
+                    <defs>
+                      <linearGradient id="chartIncomeGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#10B981" stopOpacity="0.28" />
+                        <stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
+                      </linearGradient>
+                      <linearGradient id="chartExpenseGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#EF4444" stopOpacity="0.22" />
+                        <stop offset="100%" stopColor="#EF4444" stopOpacity="0.0" />
+                      </linearGradient>
+                    </defs>
+
+                    {/* Horizontal Gridlines & Y-axis scale */}
+                    {[
+                      { val: maxMonthlyValue, y: PADDING_TOP },
+                      { val: Math.round(maxMonthlyValue / 2), y: PADDING_TOP + PLOT_HEIGHT / 2 },
+                      { val: 0, y: BASELINE_Y },
+                    ].map((tick, i) => (
+                      <g key={i}>
+                        <line
+                          x1={PADDING_LEFT}
+                          y1={tick.y}
+                          x2={PADDING_LEFT + PLOT_WIDTH}
+                          y2={tick.y}
+                          stroke={tick.val === 0 ? "rgba(20, 20, 20, 0.12)" : "rgba(20, 20, 20, 0.05)"}
+                          strokeWidth={tick.val === 0 ? 1.2 : 1}
+                          strokeDasharray={tick.val === 0 ? undefined : "3 3"}
+                        />
+                        <text
+                          x={PADDING_LEFT - 6}
+                          y={tick.y + 3.5}
+                          textAnchor="end"
+                          className="chart-axis-label"
+                        >
+                          {tick.val <= 0
+                            ? "₹0"
+                            : tick.val >= 100000
+                            ? `₹${(tick.val / 1000).toFixed(0)}k`
+                            : tick.val >= 1000
+                            ? `₹${(tick.val / 1000).toFixed(tick.val % 1000 === 0 ? 0 : 1)}k`
+                            : `₹${tick.val}`}
+                        </text>
+                      </g>
+                    ))}
+
+                    {/* Area Gradients */}
+                    {incomeAreaPath && (
+                      <path d={incomeAreaPath} fill="url(#chartIncomeGrad)" />
+                    )}
+                    {expenseAreaPath && (
+                      <path d={expenseAreaPath} fill="url(#chartExpenseGrad)" />
+                    )}
+
+                    {/* Income Line */}
+                    {incomeLinePath && (
+                      <path
+                        d={incomeLinePath}
+                        fill="none"
+                        stroke="#10B981"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    )}
+
+                    {/* Expense Line */}
+                    {expenseLinePath && (
+                      <path
+                        d={expenseLinePath}
+                        fill="none"
+                        stroke="#EF4444"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    )}
+
+                    {/* Net Profit Line (Dotted Indigo) */}
+                    {profitLinePath && (
+                      <path
+                        d={profitLinePath}
+                        fill="none"
+                        stroke="#6366F1"
+                        strokeWidth="2.2"
+                        strokeDasharray="4 4"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    )}
+
+                    {/* Vertical hover crosshair guide line */}
+                    {hoveredMonthIndex !== null && chartPoints[hoveredMonthIndex] && (
+                      <line
+                        x1={chartPoints[hoveredMonthIndex].x}
+                        y1={PADDING_TOP}
+                        x2={chartPoints[hoveredMonthIndex].x}
+                        y2={BASELINE_Y}
+                        stroke="rgba(125, 4, 75, 0.4)"
+                        strokeWidth="1.2"
+                        strokeDasharray="3 3"
+                      />
+                    )}
+
+                    {/* X-Axis month labels */}
+                    {chartPoints.map((p) => {
+                      const isHovered = hoveredMonthIndex === p.index;
+                      const isSelected = p.item.isSelected;
+                      return (
+                        <g key={`lbl-${p.item.key}`}>
+                          <text
+                            x={p.x}
+                            y={BASELINE_Y + 18}
+                            textAnchor="middle"
+                            className={`chart-month-text ${isSelected ? "is-selected" : ""} ${
+                              isHovered ? "is-hovered" : ""
+                            }`}
+                          >
+                            {p.item.shortLabel}
+                          </text>
+                          {isSelected && (
+                            <circle cx={p.x} cy={BASELINE_Y + 25} r={2} fill="#7D044B" />
+                          )}
+                        </g>
+                      );
                     })}
-                  </div>
+
+                    {/* Data Nodes */}
+                    {chartPoints.map((p) => {
+                      const isHovered = hoveredMonthIndex === p.index;
+                      const isSelected = p.item.isSelected;
+
+                      return (
+                        <g
+                          key={`nodes-${p.item.key}`}
+                          style={{ cursor: "pointer" }}
+                          onClick={() => {
+                            setCurrentDate(p.item.date);
+                            setHoveredMonthIndex(p.index);
+                          }}
+                        >
+                          {/* Income Node Halo & Dot */}
+                          {(isHovered || isSelected) && (
+                            <circle
+                              cx={p.x}
+                              cy={p.yIncome}
+                              r={isHovered ? 9 : 7}
+                              fill={isHovered ? "rgba(16, 185, 129, 0.25)" : "none"}
+                              stroke="#10B981"
+                              strokeWidth={isHovered ? 1.5 : 1.2}
+                              strokeDasharray={isSelected && !isHovered ? "2 2" : undefined}
+                            />
+                          )}
+                          <circle
+                            cx={p.x}
+                            cy={p.yIncome}
+                            r={isHovered ? 5.5 : isSelected ? 4.5 : 3.5}
+                            fill="#10B981"
+                            stroke="#FFFFFF"
+                            strokeWidth={2}
+                          />
+
+                          {/* Expense Node Halo & Dot */}
+                          {(isHovered || isSelected) && (
+                            <circle
+                              cx={p.x}
+                              cy={p.yExpense}
+                              r={isHovered ? 9 : 7}
+                              fill={isHovered ? "rgba(239, 68, 68, 0.25)" : "none"}
+                              stroke="#EF4444"
+                              strokeWidth={isHovered ? 1.5 : 1.2}
+                              strokeDasharray={isSelected && !isHovered ? "2 2" : undefined}
+                            />
+                          )}
+                          <circle
+                            cx={p.x}
+                            cy={p.yExpense}
+                            r={isHovered ? 5.5 : isSelected ? 4.5 : 3.5}
+                            fill="#EF4444"
+                            stroke="#FFFFFF"
+                            strokeWidth={2}
+                          />
+
+                          {/* Profit Node (Indigo Dotted Halo & Dot) */}
+                          {(isHovered || isSelected) && (
+                            <circle
+                              cx={p.x}
+                              cy={p.yProfit}
+                              r={isHovered ? 8 : 6}
+                              fill={isHovered ? "rgba(99, 102, 241, 0.25)" : "none"}
+                              stroke="#6366F1"
+                              strokeWidth={isHovered ? 1.5 : 1.2}
+                              strokeDasharray="2 2"
+                            />
+                          )}
+                          <circle
+                            cx={p.x}
+                            cy={p.yProfit}
+                            r={isHovered ? 4.5 : isSelected ? 3.8 : 3}
+                            fill="#6366F1"
+                            stroke="#FFFFFF"
+                            strokeWidth={1.5}
+                          />
+                        </g>
+                      );
+                    })}
+
+                    {/* Hit-test interactive columns across the chart */}
+                    {chartPoints.map((p) => {
+                      const colWidth =
+                        chartPoints.length > 1
+                          ? PLOT_WIDTH / (chartPoints.length - 1)
+                          : PLOT_WIDTH;
+
+                      return (
+                        <rect
+                          key={`hit-${p.item.key}`}
+                          x={p.x - colWidth / 2}
+                          y={0}
+                          width={colWidth}
+                          height={SVG_HEIGHT}
+                          fill="transparent"
+                          style={{ cursor: "pointer" }}
+                          onMouseEnter={() => setHoveredMonthIndex(p.index)}
+                          onTouchStart={() => setHoveredMonthIndex(p.index)}
+                          onClick={() => {
+                            setCurrentDate(p.item.date);
+                            setHoveredMonthIndex(p.index);
+                          }}
+                        />
+                      );
+                    })}
+                  </svg>
                 </div>
 
                 {/* Bottom takeaway summary */}
