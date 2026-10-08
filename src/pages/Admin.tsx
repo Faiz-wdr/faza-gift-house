@@ -411,12 +411,12 @@ export default function Admin() {
               <span className="admin-name">Faza Admin</span>
             </div>
             <button 
-              className="admin-mobile-logout-btn" 
+              className="admin-mobile-logout-btn admin-header-logout-btn" 
               onClick={handleLogout} 
-              aria-label="Logout"
+              aria-label="Sign out"
+              title="Sign out"
             >
-              <LogOut size={16} />
-              <span>Logout</span>
+              <LogOut size={18} />
             </button>
           </div>
         </header>

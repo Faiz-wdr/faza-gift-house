@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Lock, AlertCircle } from "lucide-react";
+import { Lock, AlertCircle, Eye, EyeOff, User } from "lucide-react";
 import "./Login.css";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ export default function Login() {
 
   return (
     <div className="login-page">
-      <motion.div 
+      <motion.div
         className="login-card"
         initial={{ opacity: 0, y: 35 }}
         animate={{ opacity: 1, y: 0 }}
@@ -52,13 +53,13 @@ export default function Login() {
           <h2 className="login-logo">
             Faza <span>Gift House</span>
           </h2>
-          <span className="login-badge">Admin Panel</span>
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">
           <div className="input-group">
-            <label htmlFor="email-field">Username or Email</label>
+            <label htmlFor="email-field">Username</label>
             <div className="input-wrapper">
+              <User size={18} className="input-icon" />
               <input
                 type="text"
                 id="email-field"
@@ -78,8 +79,9 @@ export default function Login() {
             <div className="input-wrapper">
               <Lock size={18} className="input-icon" />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 id="password-field"
+                className="password-input"
                 placeholder="Enter password"
                 value={password}
                 onChange={(e) => {
@@ -88,6 +90,15 @@ export default function Login() {
                 }}
                 required
               />
+              <button
+                type="button"
+                className="password-toggle-btn"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                title={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
           </div>
 
@@ -98,9 +109,9 @@ export default function Login() {
             </div>
           )}
 
-          <button 
-            type="submit" 
-            className="btn btn-green w-100 btn-login" 
+          <button
+            type="submit"
+            className="btn btn-green w-100 btn-login"
             id="login-submit-btn"
             disabled={loading}
           >

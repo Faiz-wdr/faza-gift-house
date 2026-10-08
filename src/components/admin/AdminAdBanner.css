@@ -8,6 +8,8 @@
   gap: 2.2rem;
   position: relative;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   box-sizing: border-box;
 }
 
@@ -458,6 +460,10 @@
 @media (max-width: 768px) {
   .admin-ad-banner-container {
     gap: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
   }
 
   .admin-ad-banner-container .admin-section-header {

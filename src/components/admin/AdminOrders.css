@@ -7,6 +7,10 @@
   flex-direction: column;
   gap: 2.2rem;
   position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 /* 1. TOAST NOTIFICATION */
@@ -1447,6 +1451,10 @@
 @media (max-width: 768px) {
   .admin-orders-container {
     gap: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
   }
 
   .admin-orders-container .admin-section-header {
