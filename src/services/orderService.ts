@@ -103,11 +103,22 @@ export const orderService = {
         // Merge with locally cached orders so any locally created orders are not lost
         const cached = getCachedOrders();
         const merged = [...list];
+        const unSynced: Order[] = [];
         cached.forEach((co) => {
           if (!merged.some((m) => m.id === co.id)) {
             merged.push(co);
+            unSynced.push(co);
           }
         });
+
+        // Auto-sync any local-only orders up to Supabase in the background
+        if (unSynced.length > 0) {
+          unSynced.forEach((uo) => {
+            orderService.syncOrderToSupabase(uo).catch((err) => {
+              console.warn("Background auto-sync order error:", err);
+            });
+          });
+        }
 
         saveCachedOrders(merged);
         return merged;
@@ -120,84 +131,62 @@ export const orderService = {
   },
 
   /**
-   * Saves an order. Immediately persists to local storage cache for zero-latency
-   * and offline resilience, then asynchronously attempts database synchronization.
+   * Synchronizes an individual order to Supabase
    */
-  async saveOrder(order: Order): Promise<void> {
-    // 1. Immediately persist to local cache
-    const current = getCachedOrders();
-    const existingIndex = current.findIndex((o) => o.id === order.id);
-    if (existingIndex >= 0) {
-      current[existingIndex] = { ...current[existingIndex], ...order };
-    } else {
-      current.unshift(order);
-    }
-    saveCachedOrders(current);
-
-    // 2. Also persist customer details to cache
-    if (order.customerName && order.customerName.trim()) {
-      saveCachedCustomer({
-        name: order.customerName.trim(),
-        phone: order.customerPhone || "",
-        address: order.customerAddress || ""
-      });
-    }
-
-    // 3. Attempt Supabase synchronization in a safe block
+  async syncOrderToSupabase(order: Order): Promise<void> {
     try {
-      // Upsert customer profile
+      // 1. Upsert customer profile
+      const custName = (order.customerName && order.customerName.trim()) || "Walk-in Customer";
       let customerIdUuid: string | null = null;
-      try {
-        const { data: existingCustomer } = await supabase
+
+      const { data: existingCustomer } = await supabase
+        .from("customers")
+        .select("id")
+        .eq("name", custName)
+        .maybeSingle();
+
+      if (existingCustomer) {
+        customerIdUuid = existingCustomer.id;
+        await supabase
           .from("customers")
+          .update({
+            phone: order.customerPhone || "",
+            address: order.customerAddress || ""
+          })
+          .eq("id", customerIdUuid);
+      } else {
+        const { data: newCustomer, error: custInsertError } = await supabase
+          .from("customers")
+          .insert({
+            name: custName,
+            phone: order.customerPhone || "",
+            address: order.customerAddress || ""
+          })
           .select("id")
-          .eq("name", order.customerName)
-          .maybeSingle();
+          .single();
 
-        if (existingCustomer) {
-          customerIdUuid = existingCustomer.id;
-          await supabase
-            .from("customers")
-            .update({
-              phone: order.customerPhone,
-              address: order.customerAddress
-            })
-            .eq("id", customerIdUuid);
-        } else {
-          const { data: newCustomer, error: custError } = await supabase
-            .from("customers")
-            .insert({
-              name: order.customerName,
-              phone: order.customerPhone,
-              address: order.customerAddress
-            })
-            .select("id")
-            .single();
-
-          if (!custError && newCustomer) {
-            customerIdUuid = newCustomer.id;
-          }
+        if (newCustomer) {
+          customerIdUuid = newCustomer.id;
+        } else if (custInsertError) {
+          console.warn("Supabase customer insert warning:", custInsertError);
         }
-      } catch (custErr) {
-        console.warn("Supabase customer sync warning:", custErr);
       }
 
-      // If customer could not be resolved in Supabase (e.g. RLS restricted),
-      // we cannot satisfy foreign key customer_id in remote orders table
       if (!customerIdUuid) {
+        console.warn("Customer could not be resolved in Supabase, order will be stored locally.");
         return;
       }
 
-      // Prepare Order Payload
+      // 2. Upsert Order
       const orderPayload = {
         order_id: order.id,
         customer_id: customerIdUuid,
-        status: order.status,
-        payment_status: order.payment,
-        total_amount: order.grandTotal,
-        paid_amount: order.paidAmount,
-        pending_amount: order.pendingAmount,
-        tracking_id: order.trackingId,
+        status: order.status || "Pending",
+        payment_status: order.payment || "Pending",
+        total_amount: order.grandTotal || 0,
+        paid_amount: order.paidAmount || 0,
+        pending_amount: order.pendingAmount || 0,
+        tracking_id: order.trackingId || "",
         delivery_date: order.deliveryDate || null
       };
 
@@ -221,8 +210,10 @@ export const orderService = {
           .select("id")
           .single();
 
-        if (!ordError && newOrder) {
+        if (newOrder) {
           orderIdUuid = newOrder.id;
+        } else if (ordError) {
+          console.warn("Supabase order insert warning:", ordError);
         }
       }
 
@@ -230,45 +221,75 @@ export const orderService = {
         return;
       }
 
-      // Re-populate Order Items
+      // 3. Re-populate Order Items
       await supabase
         .from("order_items")
         .delete()
         .eq("order_id", orderIdUuid);
 
-      // Fetch matching products
+      // Fetch matching products for foreign keys
       const { data: dbProds } = await supabase
         .from("products")
         .select("id, product_id");
 
       const defaultProductUuid = dbProds && dbProds.length > 0 ? dbProds[0].id : null;
 
-      const itemsPayload = order.items
-        .map((item) => {
-          const matchedProd = dbProds?.find(
-            (p) => p.product_id === item.productId || p.id === item.productId
-          );
-          const targetUuid = matchedProd?.id || defaultProductUuid;
-          if (!targetUuid) return null;
+      if (order.items && order.items.length > 0) {
+        const itemsPayload = order.items
+          .map((item) => {
+            const matchedProd = dbProds?.find(
+              (p) => p.product_id === item.productId || p.id === item.productId
+            );
+            const targetUuid = matchedProd?.id || defaultProductUuid;
+            if (!targetUuid) return null;
 
-          return {
-            order_id: orderIdUuid,
-            product_id: targetUuid,
-            size_name: item.size || "Standard",
-            material_name: item.material || "Standard",
-            quantity: Math.max(1, Number(item.qty) || 1),
-            unit_price: Math.max(0, Number(item.price) || 0),
-            total_price: Math.max(0, Number(item.total) || 0)
-          };
-        })
-        .filter((item): item is NonNullable<typeof item> => item !== null);
+            return {
+              order_id: orderIdUuid,
+              product_id: targetUuid,
+              size_name: item.size || "Standard",
+              material_name: item.material || "Standard",
+              quantity: Math.max(1, Number(item.qty) || 1),
+              unit_price: Math.max(0, Number(item.price) || 0),
+              total_price: Math.max(0, Number(item.total) || 0)
+            };
+          })
+          .filter((item): item is NonNullable<typeof item> => item !== null);
 
-      if (itemsPayload.length > 0) {
-        await supabase.from("order_items").insert(itemsPayload);
+        if (itemsPayload.length > 0) {
+          await supabase.from("order_items").insert(itemsPayload);
+        }
       }
     } catch (syncErr) {
-      console.warn("Supabase order sync warning (order securely saved locally):", syncErr);
+      console.warn("Supabase order sync error:", syncErr);
     }
+  },
+
+  /**
+   * Saves an order. Immediately persists to local storage cache for zero-latency
+   * and offline resilience, then asynchronously synchronizes to Supabase.
+   */
+  async saveOrder(order: Order): Promise<void> {
+    // 1. Immediately persist to local cache
+    const current = getCachedOrders();
+    const existingIndex = current.findIndex((o) => o.id === order.id);
+    if (existingIndex >= 0) {
+      current[existingIndex] = { ...current[existingIndex], ...order };
+    } else {
+      current.unshift(order);
+    }
+    saveCachedOrders(current);
+
+    // 2. Also persist customer details to cache
+    if (order.customerName && order.customerName.trim()) {
+      saveCachedCustomer({
+        name: order.customerName.trim(),
+        phone: order.customerPhone || "",
+        address: order.customerAddress || ""
+      });
+    }
+
+    // 3. Synchronize with Supabase database
+    await this.syncOrderToSupabase(order);
   },
 
   /**

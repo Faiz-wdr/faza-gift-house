@@ -199,39 +199,115 @@
   color: rgba(255, 255, 255, 0.75);
 }
 
-/* Dynamic Pricing Container */
-.preview-price-summary {
-  background-color: rgba(125, 4, 75, 0.02);
-  border-radius: 12px;
-  padding: 1.2rem 1.6rem;
-  border: 1px solid rgba(125, 4, 75, 0.06);
+.preview-header-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.price-label-row {
+.preview-image-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.preview-star-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #F59E0B;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  border: 2px solid #FFFFFF;
+  z-index: 2;
+}
+
+/* Option Labels */
+.option-label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.option-sublabel {
   font-size: 0.75rem;
-  font-weight: 600;
   color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  font-weight: 500;
 }
 
-.price-value-large {
-  font-size: 2.2rem;
-  font-weight: 800;
-  color: var(--primary-color);
-  margin-top: 0.2rem;
-  line-height: 1.1;
+/* Sizes & Pricing List */
+.preview-sizes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.preview-order-btn {
-  margin-top: 0.5rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  transition: var(--transition-medium);
+.preview-size-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 0.95rem;
+  background-color: #FAF8F5;
+  border: 1px solid rgba(125, 4, 75, 0.08);
+  border-radius: 8px;
+  transition: all 0.15s ease;
 }
 
-.preview-order-btn:hover {
-  box-shadow: 0 8px 25px rgba(125, 4, 75, 0.25);
-  transform: translateY(-2px);
+.preview-size-row:hover {
+  background-color: #F6F0E9;
+  border-color: rgba(125, 4, 75, 0.18);
+}
+
+.preview-size-details {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.preview-size-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  background-color: var(--primary-color, #7D044B);
+  color: #FFFFFF;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.preview-size-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.preview-size-name {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.preview-size-dimensions {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.preview-size-price-val {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--primary-color, #7D044B);
+  letter-spacing: -0.01em;
 }
 
 /* RESPONSIVE LAYOUTS */

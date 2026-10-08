@@ -412,7 +412,6 @@ export default function Admin() {
         {/* Top Header Row */}
         <header className="admin-header">
           <div className="header-left">
-            <h1 className="admin-page-title desktop-only-title">{activeMenu}</h1>
             <div className="admin-mobile-brand">
               Faza <span>Gift House</span>
             </div>
@@ -574,7 +573,6 @@ export default function Admin() {
                       <table className="orders-table">
                         <thead>
                           <tr>
-                            <th>Reference</th>
                             <th>Description</th>
                             <th>Amount</th>
                             <th>Status</th>
@@ -585,7 +583,7 @@ export default function Admin() {
                         <tbody>
                           {recentPayments.length === 0 ? (
                             <tr>
-                              <td colSpan={6} className="empty-table-cell">
+                              <td colSpan={5} className="empty-table-cell">
                                 <div className="empty-payments-state">
                                   <CreditCard size={28} className="empty-payments-icon" />
                                   <p>No payments recorded yet</p>
@@ -599,20 +597,19 @@ export default function Admin() {
                               const statusStr = String(pmt.status || "Paid");
                               return (
                                 <tr key={pmt.id || Math.random()}>
-                                  <td className="col-id">
+                                  <td className="col-customer" title={pmt.customerName || "Customer"}>
                                     {pmt.isOrder ? (
-                                      <span 
-                                        style={{ cursor: "pointer", textDecoration: "underline" }}
+                                      <span
+                                        style={{ cursor: "pointer" }}
                                         onClick={() => setActiveMenu("Orders")}
                                         title="Click to view order in Orders tab"
                                       >
-                                        {pmt.reference || "Order"}
+                                        {pmt.customerName || "Customer"}
                                       </span>
                                     ) : (
-                                      <span>{pmt.reference || "Payment"}</span>
+                                      pmt.customerName || "Customer"
                                     )}
                                   </td>
-                                  <td className="col-customer" title={pmt.customerName || "Customer"}>{pmt.customerName || "Customer"}</td>
                                   <td className="payment-amount-cell">
                                     +₹{(Number(pmt.amount) || 0).toLocaleString("en-IN")}
                                   </td>

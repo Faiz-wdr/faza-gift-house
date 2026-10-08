@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, MessageCircle } from "lucide-react";
+import { X, Star } from "lucide-react";
 import "./ProductPreviewModal.css";
 
 // Interface matches our AdminProduct structure
@@ -45,87 +45,55 @@ interface ProductPreviewModalProps {
 }
 
 export default function ProductPreviewModal({ product, isOpen, onClose }: ProductPreviewModalProps) {
-  const [selectedSize, setSelectedSize] = useState<"large" | "medium" | "small" | "">("");
   const [selectedMaterial, setSelectedMaterial] = useState<"wood" | "acrylic" | "glass" | "">("");
-  const [priceDisplay, setPriceDisplay] = useState<string>("—");
 
-  // Reset selected options on open
+  const sizeKeys = ["small", "medium", "large"] as const;
+  const enabledSizes = sizeKeys.filter((k) => !product.enableSizes || product.sizes?.[k]?.enabled);
+
+  const materialKeys = ["wood", "acrylic", "glass"] as const;
+  const enabledMaterials = materialKeys.filter((m) => product.enableMaterials && product.materials?.[m]);
+
+  // Reset selected material on open
   useEffect(() => {
     if (isOpen) {
-      // Find first enabled size
-      const firstSize = (["large", "medium", "small"] as const).find(
-        (key) => product.sizes[key].enabled
-      );
-      setSelectedSize(product.enableSizes ? firstSize || "" : "");
-
-      // Find first enabled material
-      const firstMat = (["wood", "acrylic", "glass"] as const).find(
-        (key) => product.materials[key]
-      );
-      setSelectedMaterial(product.enableMaterials ? firstMat || "" : "");
+      if (product.enableMaterials && enabledMaterials.length > 0) {
+        setSelectedMaterial(enabledMaterials[0]);
+      } else {
+        setSelectedMaterial("");
+      }
     }
   }, [isOpen, product]);
 
-  // Recalculate price dynamically when selection changes
-  useEffect(() => {
-    if (!isOpen) return;
-
-    if (product.enableSizes && product.enableMaterials) {
-      // Both sizes and materials enabled
-      if (selectedSize && selectedMaterial) {
-        const price = product.pricingMatrix[selectedSize]?.[selectedMaterial];
-        setPriceDisplay(price ? `₹${price}` : "Unavailable");
-      } else {
-        setPriceDisplay("—");
-      }
-    } else if (product.enableSizes) {
-      // Sizes only
-      if (selectedSize) {
-        const price = product.sizePrices[selectedSize];
-        setPriceDisplay(price ? `₹${price}` : "Unavailable");
-      } else {
-        setPriceDisplay("—");
-      }
-    } else if (product.enableMaterials) {
-      // Materials only
-      if (selectedMaterial) {
-        const price = product.materialPrices[selectedMaterial];
-        setPriceDisplay(price ? `₹${price}` : "Unavailable");
-      } else {
-        setPriceDisplay("—");
-      }
-    } else {
-      // Neither - base price
-      setPriceDisplay(product.basePrice ? `₹${product.basePrice}` : "—");
-    }
-  }, [selectedSize, selectedMaterial, product, isOpen]);
-
   if (!isOpen) return null;
 
-  const handleOrderClick = () => {
-    let orderText = `Hello Faza Gift House, I would like to get a quote/order for:
-Product: *${product.title}* (ID: ${product.id})`;
-
-    if (product.enableSizes && selectedSize) {
-      const sizeObj = product.sizes[selectedSize];
-      orderText += `\nSize: *${selectedSize.toUpperCase()}* (${sizeObj.width} x ${sizeObj.height} CM)`;
+  // Calculate price for a size
+  const getSizePrice = (sizeKey: "small" | "medium" | "large"): string => {
+    if (product.enableSizes && product.enableMaterials) {
+      const mat = selectedMaterial || enabledMaterials[0] || "wood";
+      const val = product.pricingMatrix?.[sizeKey]?.[mat];
+      return val ? `₹${parseFloat(val).toLocaleString("en-IN")}` : "—";
     }
-    if (product.enableMaterials && selectedMaterial) {
-      orderText += `\nMaterial: *${selectedMaterial.toUpperCase()}*`;
+    if (product.enableSizes) {
+      const val = product.sizePrices?.[sizeKey];
+      return val ? `₹${parseFloat(val).toLocaleString("en-IN")}` : "—";
     }
-    orderText += `\nPrice: *${priceDisplay}*`;
-
-    window.open(`https://wa.me/919188086244?text=${encodeURIComponent(orderText)}`, "_blank");
+    return product.basePrice ? `₹${parseFloat(product.basePrice).toLocaleString("en-IN")}` : "—";
   };
+
+  const matLabels: Record<string, string> = { wood: "Multi-Wood", acrylic: "Acrylic", glass: "Glass" };
+  const sizeNames: Record<string, string> = { small: "Small", medium: "Medium", large: "Large" };
 
   return (
     <div className="preview-modal-backdrop" onClick={onClose}>
       <div className="preview-modal-card" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="preview-modal-header">
-          <h3>Quick View Storefront</h3>
+          <div className="preview-header-title-wrap">
+            <h3>Product Preview</h3>
+            <span className="preview-id-badge">{product.id || "N/A"}</span>
+          </div>
           <button className="preview-close-btn" onClick={onClose} aria-label="Close Preview">
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
@@ -133,74 +101,105 @@ Product: *${product.title}* (ID: ${product.id})`;
         <div className="preview-modal-body">
           {/* Left: Product Image */}
           <div className="preview-image-section">
-            <img src={product.image || "/placeholder.png"} alt={product.title} />
+            <div className="preview-image-wrap">
+              <img src={product.image || "/placeholder.png"} alt={product.title} />
+              {product.featured && (
+                <span className="product-thumb-star preview-star-badge" title="Featured Product">
+                  <Star size={12} fill="currentColor" />
+                </span>
+              )}
+            </div>
           </div>
 
-          {/* Right: Product Details & Options */}
+          {/* Right: Product Details & Prices of Each Size */}
           <div className="preview-details-section">
             <div className="preview-info-header">
               <h2 className="preview-title">{product.title || "Unnamed Product"}</h2>
-              <span className="preview-id-badge">ID: {product.id || "N/A"}</span>
             </div>
 
-            {/* Size Selector */}
-            {product.enableSizes && (
+            {/* Material Selector (if materials are enabled) */}
+            {product.enableMaterials && enabledMaterials.length > 0 && (
               <div className="preview-option-group">
-                <span className="option-label">Select Size</span>
+                <span className="option-label">Material</span>
                 <div className="preview-chips-container">
-                  {(["small", "medium", "large"] as const).map((key) => {
-                    const sizeObj = product.sizes[key];
-                    if (!sizeObj.enabled) return null;
-                    return (
-                      <button
-                        key={key}
-                        className={`preview-chip ${selectedSize === key ? "active" : ""}`}
-                        onClick={() => setSelectedSize(key)}
-                      >
-                        <span className="size-name">{key}</span>
-                        <span className="size-dims">{sizeObj.width} × {sizeObj.height} cm</span>
-                      </button>
-                    );
-                  })}
+                  {enabledMaterials.map((key) => (
+                    <button
+                      key={key}
+                      type="button"
+                      className={`preview-chip ${selectedMaterial === key ? "active" : ""}`}
+                      onClick={() => setSelectedMaterial(key)}
+                    >
+                      {matLabels[key]}
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
 
-            {/* Material Selector */}
-            {product.enableMaterials && (
+            {/* Prices of Each Size */}
+            {product.enableSizes && enabledSizes.length > 0 ? (
               <div className="preview-option-group">
-                <span className="option-label">Select Material</span>
-                <div className="preview-chips-container">
-                  {(["wood", "acrylic", "glass"] as const).map((key) => {
-                    if (!product.materials[key]) return null;
-                    const matLabels = { wood: "Multi-Wood", acrylic: "Acrylic", glass: "Glass" };
+                <div className="option-label-row">
+                  <span className="option-label">Prices by Size</span>
+                  {product.enableMaterials && selectedMaterial && (
+                    <span className="option-sublabel">({matLabels[selectedMaterial]})</span>
+                  )}
+                </div>
+                <div className="preview-sizes-list">
+                  {enabledSizes.map((key) => {
+                    const sizeObj = product.sizes?.[key];
+                    const price = getSizePrice(key);
                     return (
-                      <button
-                        key={key}
-                        className={`preview-chip ${selectedMaterial === key ? "active" : ""}`}
-                        onClick={() => setSelectedMaterial(key)}
-                      >
-                        {matLabels[key]}
-                      </button>
+                      <div key={key} className="preview-size-row">
+                        <div className="preview-size-details">
+                          <span className="preview-size-tag">{key.charAt(0).toUpperCase()}</span>
+                          <div className="preview-size-text">
+                            <span className="preview-size-name">{sizeNames[key]}</span>
+                            {sizeObj && (
+                              <span className="preview-size-dimensions">
+                                {sizeObj.width} × {sizeObj.height} cm
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="preview-size-price-val">{price}</div>
+                      </div>
                     );
                   })}
                 </div>
               </div>
-            )}
-
-            {/* Dynamic Price Display */}
-            <div className="preview-price-summary">
-              <div className="price-label-row">
-                <span>Calculated Price</span>
+            ) : product.enableMaterials && enabledMaterials.length > 0 ? (
+              /* Single size with materials */
+              <div className="preview-option-group">
+                <span className="option-label">Material Pricing</span>
+                <div className="preview-sizes-list">
+                  {enabledMaterials.map((key) => {
+                    const price = product.materialPrices?.[key];
+                    return (
+                      <div key={key} className="preview-size-row">
+                        <span className="preview-size-name">{matLabels[key]}</span>
+                        <div className="preview-size-price-val">
+                          {price ? `₹${parseFloat(price).toLocaleString("en-IN")}` : "—"}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="price-value-large">{priceDisplay}</div>
-            </div>
-
-            {/* Action Order Button */}
-            <button className="btn btn-whatsapp w-100 preview-order-btn" onClick={handleOrderClick}>
-              <MessageCircle size={18} />
-              <span>Inquire on WhatsApp</span>
-            </button>
+            ) : (
+              /* Single Base Price */
+              <div className="preview-option-group">
+                <span className="option-label">Standard Price</span>
+                <div className="preview-sizes-list">
+                  <div className="preview-size-row">
+                    <span className="preview-size-name">Base Price</span>
+                    <div className="preview-size-price-val">
+                      ₹{product.basePrice ? parseFloat(product.basePrice).toLocaleString("en-IN") : "0"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

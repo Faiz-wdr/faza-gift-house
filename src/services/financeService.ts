@@ -153,6 +153,31 @@ export const financeService = {
           created_at: item.created_at,
           updated_at: item.updated_at
         }));
+
+        // Check if there are locally cached transactions not yet synced to Supabase
+        const cached = getCachedFinanceTransactions();
+        const unSynced = cached.filter((c) => !data.some((d: any) => d.id === c.id));
+        if (unSynced.length > 0) {
+          unSynced.forEach(async (u) => {
+            try {
+              await supabase.from("finance_transactions").upsert({
+                id: u.id,
+                type: u.type,
+                amount: u.amount,
+                date: u.date,
+                description: u.description,
+                category: u.category || null,
+                payment_method: u.payment_method || null,
+                order_id: u.order_id || null,
+                created_at: u.created_at || new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              });
+            } catch (syncErr) {
+              console.warn("Background auto-sync finance transaction warning:", syncErr);
+            }
+          });
+        }
+
         saveCachedFinanceTransactions(mapped);
         return mapped;
       }
@@ -211,15 +236,12 @@ export const financeService = {
         updated_at: nowIso
       };
 
-      if (existingId) {
-        await supabase
-          .from("finance_transactions")
-          .update(payload)
-          .eq("id", existingId);
-      } else {
-        await supabase
-          .from("finance_transactions")
-          .insert({ ...payload, created_at: nowIso });
+      const { error: syncError } = await supabase
+        .from("finance_transactions")
+        .upsert({ ...payload, created_at: existingId ? undefined : nowIso });
+
+      if (syncError) {
+        console.warn("Supabase save finance transaction warning:", syncError);
       }
     } catch (e) {
       console.warn("Supabase save finance transaction error (persisted locally):", e);

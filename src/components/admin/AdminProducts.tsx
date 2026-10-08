@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Eye, Edit2, Trash2, Upload, Download, Loader2, LayoutGrid, List } from "lucide-react";
+import { Plus, Eye, Edit2, Trash2, Upload, Download, Loader2, LayoutGrid, List, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import type { AdminProduct } from "./ProductPreviewModal";
 import { exportToCSV, parseCSV } from "../../utils/csvHelper";
@@ -100,7 +100,11 @@ function AdminProductCard({
       {/* Product Image */}
       <div className="admin-card-image-box">
         <img src={product.image || "/placeholder.png"} alt={product.title} />
-        {product.featured && <span className="featured-card-badge">Featured</span>}
+        {product.featured && (
+          <span className="product-thumb-star card-star-badge" title="Featured Product">
+            <Star size={11} fill="currentColor" />
+          </span>
+        )}
       </div>
 
       {/* Card details */}
@@ -162,30 +166,30 @@ function AdminProductCard({
         <div className="admin-card-actions">
           <button
             type="button"
-            className="btn-action-icon preview-btn"
+            className="action-icon-btn preview"
             onClick={() => onPreviewClick(product)}
-            title="Quick Storefront Preview"
+            title="Preview Product"
+            aria-label="Preview Product"
           >
-            <Eye size={14} />
-            <span>Preview</span>
+            <Eye size={15} />
           </button>
           <button
             type="button"
-            className="btn-action-icon edit-btn"
+            className="action-icon-btn edit"
             onClick={() => onEditClick(product)}
-            title="Edit Listing Details"
+            title="Edit Product"
+            aria-label="Edit Product"
           >
-            <Edit2 size={14} />
-            <span>Edit</span>
+            <Edit2 size={15} />
           </button>
           <button
             type="button"
-            className="btn-action-icon delete-btn"
+            className="action-icon-btn delete"
             onClick={() => onDeleteClick(product.id)}
-            title="Delete Product Listing"
+            title="Delete Product"
+            aria-label="Delete Product"
           >
-            <Trash2 size={14} />
-            <span>Delete</span>
+            <Trash2 size={15} />
           </button>
         </div>
       </div>
@@ -214,31 +218,32 @@ function AdminProductListRow({
       {/* Product Image & Info */}
       <td className="col-product-main">
         <div className="list-product-cell">
-          <img
-            src={product.image || "/placeholder.png"}
-            alt={product.title}
-            className="list-product-thumb"
-          />
+          <div className="list-product-thumb-wrap">
+            <img
+              src={product.image || "/placeholder.png"}
+              alt={product.title}
+              className="list-product-thumb"
+            />
+            {product.featured && (
+              <span className="product-thumb-star" title="Featured Product">
+                <Star size={10} fill="currentColor" />
+              </span>
+            )}
+          </div>
           <div className="list-product-info">
             <span className="list-product-title" title={product.title}>
               {product.title || "Unnamed Product"}
             </span>
-            <div className="list-product-meta">
-              <span className="list-product-id">{product.id}</span>
-              {product.featured && <span className="list-badge-featured">Featured</span>}
-            </div>
+            <span className="list-product-id">{product.id}</span>
           </div>
         </div>
       </td>
 
-      {/* Starting Price */}
+      {/* Price */}
       <td className="col-price">
-        <div className="list-price-container">
-          <span className="list-price-val">
-            ₹{startingPrice > 0 ? startingPrice.toLocaleString("en-IN") : product.basePrice || "0"}
-          </span>
-          <span className="list-price-label">Starting</span>
-        </div>
+        <span className="list-price-val">
+          ₹{startingPrice > 0 ? startingPrice.toLocaleString("en-IN") : product.basePrice || "0"}
+        </span>
       </td>
 
       {/* Sizes */}
@@ -278,30 +283,30 @@ function AdminProductListRow({
         <div className="list-actions-group">
           <button
             type="button"
-            className="btn-action-icon preview-btn"
+            className="action-icon-btn preview"
             onClick={() => onPreviewClick(product)}
-            title="Quick Preview"
+            title="Preview Product"
+            aria-label="Preview Product"
           >
-            <Eye size={14} />
-            <span>Preview</span>
+            <Eye size={16} />
           </button>
           <button
             type="button"
-            className="btn-action-icon edit-btn"
+            className="action-icon-btn edit"
             onClick={() => onEditClick(product)}
-            title="Edit Details"
+            title="Edit Product"
+            aria-label="Edit Product"
           >
-            <Edit2 size={14} />
-            <span>Edit</span>
+            <Edit2 size={16} />
           </button>
           <button
             type="button"
-            className="btn-action-icon delete-btn"
+            className="action-icon-btn delete"
             onClick={() => onDeleteClick(product.id)}
-            title="Delete Listing"
+            title="Delete Product"
+            aria-label="Delete Product"
           >
-            <Trash2 size={14} />
-            <span>Delete</span>
+            <Trash2 size={16} />
           </button>
         </div>
       </td>
