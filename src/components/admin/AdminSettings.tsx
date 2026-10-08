@@ -36,10 +36,10 @@ export default function AdminSettings() {
         {toastMessage && (
           <motion.div
             className="settings-toast"
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            initial={{ opacity: 0, y: 15, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            transition={{ duration: 0.25 }}
+            exit={{ opacity: 0, y: 15, scale: 0.95 }}
+            transition={{ duration: 0.22 }}
           >
             <Check size={16} />
             <span>{toastMessage}</span>

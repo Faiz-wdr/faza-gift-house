@@ -13,7 +13,8 @@ import {
   MapPin,
   Calendar,
   Eye,
-  AlertCircle
+  AlertCircle,
+  CreditCard
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { AdminProduct } from "./ProductPreviewModal";
@@ -58,6 +59,53 @@ interface AdminOrdersProps {
   onEditOrder: (order: Order) => void;
   onDeleteOrder: (id: string) => void;
 }
+
+const calculateDeliveryDaysLeft = (deliveryDateStr?: string, status?: string): { text: string; isOverdue: boolean } => {
+  if (status === "Delivered") {
+    return { text: "Delivered", isOverdue: false };
+  }
+  if (!deliveryDateStr || deliveryDateStr === "Pending Delivery") {
+    return { text: "Date not specified", isOverdue: false };
+  }
+
+  let targetDate: Date | null = null;
+  const direct = new Date(deliveryDateStr);
+  if (!isNaN(direct.getTime())) {
+    targetDate = direct;
+  } else {
+    const parts = deliveryDateStr.split(/[-/]/);
+    if (parts.length === 3) {
+      const d = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10) - 1;
+      const y = parseInt(parts[2], 10);
+      if (!isNaN(d) && !isNaN(m) && !isNaN(y)) {
+        targetDate = new Date(y, m, d);
+      }
+    }
+  }
+
+  if (!targetDate || isNaN(targetDate.getTime())) {
+    return { text: deliveryDateStr, isOverdue: false };
+  }
+
+  const now = new Date();
+  const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const targetMidnight = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate()).getTime();
+
+  const diffMs = targetMidnight - todayMidnight;
+  const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays > 1) {
+    return { text: `${diffDays} days left`, isOverdue: false };
+  } else if (diffDays === 1) {
+    return { text: "1 day left", isOverdue: false };
+  } else if (diffDays === 0) {
+    return { text: "Due today", isOverdue: false };
+  } else {
+    const overdue = Math.abs(diffDays);
+    return { text: `${overdue} day${overdue > 1 ? "s" : ""} overdue`, isOverdue: true };
+  }
+};
 
 export default function AdminOrders({
   orders,
@@ -141,6 +189,20 @@ export default function AdminOrders({
     setSelectedOrder(updated);
     onEditOrder(updated);
     setToastMessage(`Order #${order.id} reverted to Pending.`);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3000);
+  };
+
+  // Update Order Status (Pending / Delivered)
+  const handleUpdateOrderStatus = (order: Order, newStatus: "Pending" | "Delivered") => {
+    const updated: Order = {
+      ...order,
+      status: newStatus
+    };
+    setSelectedOrder(updated);
+    onEditOrder(updated);
+    setToastMessage(`Order #${order.id} marked as ${newStatus}!`);
     setTimeout(() => {
       setToastMessage(null);
     }, 3000);
@@ -430,21 +492,128 @@ export default function AdminOrders({
 
               {/* Drawer Body Contents */}
               <div className="drawer-body">
-                {/* 1. Status Badges Header */}
-                <div className="drawer-status-summary">
-                  <div className="status-item">
-                    <span className="summary-label">Order Status</span>
-                    <span className={`status-badge ${selectedOrder.status.toLowerCase().replace(/\s+/g, "-")}`}>
-                      {selectedOrder.status}
-                    </span>
-                  </div>
-                  <div className="status-item">
-                    <span className="summary-label">Payment Status</span>
-                    <span className={`payment-badge ${selectedOrder.payment.toLowerCase()}`}>
-                      {selectedOrder.payment}
-                    </span>
-                  </div>
-                </div>
+                {/* 1. Status & Payment Unified Card */}
+                {(() => {
+                  const deliveryDays = calculateDeliveryDaysLeft(selectedOrder.deliveryDate, selectedOrder.status);
+                  const isDelivered = selectedOrder.status === "Delivered";
+                  const isPaid = selectedOrder.payment === "Paid";
+                  const dueAmount = selectedOrder.pendingAmount || selectedOrder.grandTotal;
+
+                  return (
+                    <div className="drawer-status-summary-card">
+                      {/* Left: ORDER */}
+                      <div className="drawer-status-col">
+                        <div className="drawer-status-col-header">
+                          <span>ORDER</span>
+                        </div>
+
+                        <div className="drawer-status-pill-row">
+                          <span className={`status-bullet-pill ${selectedOrder.status.toLowerCase().replace(/\s+/g, "-")}`}>
+                            <span className="bullet-dot" />
+                            <span>{selectedOrder.status}</span>
+                          </span>
+                        </div>
+
+                        <div className="drawer-status-detail-row">
+                          {!isDelivered ? (
+                            <div className={`detail-info-item days-left ${deliveryDays.isOverdue ? "overdue" : ""}`}>
+                              <span className="detail-text">{deliveryDays.text}</span>
+                            </div>
+                          ) : (
+                            <div className="detail-info-item delivered">
+                              <span className="detail-text">Delivered</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="drawer-status-btn-row">
+                          {!isDelivered ? (
+                            <button
+                              type="button"
+                              className="btn-order-status-filled"
+                              onClick={() => handleUpdateOrderStatus(selectedOrder, "Delivered")}
+                            >
+                              <CheckCircle2 size={18} strokeWidth={2.2} />
+                              <span>Mark as Delivered</span>
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="btn-order-status-outline"
+                              onClick={() => handleUpdateOrderStatus(selectedOrder, "Pending")}
+                            >
+                              <span>Mark as Pending</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Subtle Vertical Divider */}
+                      <div className="drawer-status-divider" />
+
+                      {/* Right: PAYMENT */}
+                      <div className="drawer-status-col">
+                        <div className="drawer-status-col-header">
+                          <span>PAYMENT</span>
+                        </div>
+
+                        <div className="drawer-status-pill-row">
+                          <span className={`status-bullet-pill ${selectedOrder.payment.toLowerCase()}`}>
+                            <span className="bullet-dot" />
+                            <span>{selectedOrder.payment}</span>
+                          </span>
+                        </div>
+
+                        <div className="drawer-status-detail-row">
+                          {!isPaid ? (
+                            <div className="detail-amount-item">
+                              <span className="amount-value">₹{dueAmount.toLocaleString("en-IN")}</span>
+                              <span className="amount-label">due</span>
+                            </div>
+                          ) : (
+                            <div className="detail-amount-item paid">
+                              <span className="amount-value">₹{selectedOrder.grandTotal.toLocaleString("en-IN")}</span>
+                              <span className="amount-label">paid</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="drawer-status-btn-row">
+                          {!isPaid ? (
+                            <button
+                              type="button"
+                              className="btn-payment-status-outline"
+                              onClick={() => handleOpenPaymentModal(selectedOrder)}
+                            >
+                              <CreditCard size={18} strokeWidth={2} />
+                              <span>Record Payment</span>
+                            </button>
+                          ) : (
+                            <div className="paid-action-buttons">
+                              <button
+                                type="button"
+                                className="btn-payment-status-outline"
+                                onClick={() => handleOpenPaymentModal(selectedOrder)}
+                                style={{ flex: 1 }}
+                              >
+                                <CreditCard size={15} />
+                                <span>Edit</span>
+                              </button>
+                              <button
+                                type="button"
+                                className="btn-payment-status-outline"
+                                onClick={() => handleMarkAsPending(selectedOrder)}
+                                style={{ flex: 1 }}
+                              >
+                                <span>Revert</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* 2. Customer Information */}
                 <div className="drawer-section-card">
@@ -574,45 +743,8 @@ export default function AdminOrders({
 
                 {/* Drawer Footer Actions */}
                 <div className="drawer-footer-actions">
-                  {selectedOrder.payment !== "Paid" ? (
-                    <button
-                      type="button"
-                      className="btn btn-mark-paid-primary"
-                      onClick={() => handleOpenPaymentModal(selectedOrder)}
-                    >
-                      <CheckCircle2 size={18} />
-                      <span>{selectedOrder.payment === "Partial" ? "Record Payment" : "Mark as Paid"}</span>
-                    </button>
-                  ) : (
-                    <div className="paid-confirmed-bar">
-                      <div className="paid-verified-badge">
-                        <CheckCircle2 size={15} />
-                        <span>Payment Received (₹{selectedOrder.grandTotal.toLocaleString("en-IN")})</span>
-                      </div>
-                      <div className="paid-actions-group" style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                        <button
-                          type="button"
-                          className="btn-unmark-link"
-                          style={{ color: "var(--primary-color)", fontWeight: 600 }}
-                          onClick={() => handleOpenPaymentModal(selectedOrder)}
-                          title="Edit payment amount"
-                        >
-                          Edit
-                        </button>
-                        <span style={{ color: "rgba(0,0,0,0.2)" }}>•</span>
-                        <button
-                          type="button"
-                          className="btn-unmark-link"
-                          onClick={() => handleMarkAsPending(selectedOrder)}
-                          title="Revert payment status to Pending"
-                        >
-                          Revert to Pending
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
                   <button
+                    type="button"
                     className="btn btn-whatsapp w-100"
                     onClick={(e) => handleInvoiceClick(selectedOrder, e)}
                   >
