@@ -256,6 +256,10 @@
   grid-template-columns: 1.15fr 0.85fr;
   gap: 1.5rem;
   align-items: start;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 /* Section Cards (Chart & Activity) */
@@ -268,6 +272,10 @@
   display: flex;
   flex-direction: column;
   gap: 1.4rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .section-card-header {
@@ -339,6 +347,10 @@
   border-radius: var(--radius-sm);
   padding: 1.25rem 1rem;
   border: 1px solid rgba(125, 4, 75, 0.06);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .chart-scroll-wrapper {
@@ -350,6 +362,10 @@
   scrollbar-color: rgba(125, 4, 75, 0.25) transparent;
   padding: 0.5rem 0.2rem 0.4rem;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
 }
 
 .chart-scroll-wrapper::-webkit-scrollbar {
@@ -667,6 +683,8 @@
   font-size: 0.92rem;
   font-weight: 600;
   color: var(--text-dark);
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .order-linked-pill {
@@ -1454,6 +1472,10 @@
   .finance-dashboard-container,
   .finance-table-view-container {
     gap: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
   }
 
   .finance-dashboard-container .admin-section-header,
@@ -1483,6 +1505,286 @@
   .finance-dashboard-container .section-header-subtitle,
   .finance-table-view-container .section-header-subtitle {
     display: none !important;
+  }
+
+  /* Finance Summary Cards (Top) */
+  .finance-summary-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .finance-card {
+    padding: 12px 14px !important;
+    gap: 12px !important;
+    border-radius: 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Two-column grid (Recent Activity & Monthly Comparison) - Single column on mobile */
+  .finance-two-col-grid {
+    grid-template-columns: 100% !important;
+    gap: 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Section Cards (Recent Activity Card & Comparison Card) */
+  .finance-section-card {
+    padding: 14px 12px !important;
+    gap: 12px !important;
+    border-radius: 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  .section-card-header {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+
+  .section-card-title {
+    font-size: 0.82rem !important;
+  }
+
+  .chart-legend-group {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .chart-legend-badge {
+    padding: 2px 7px !important;
+    font-size: 0.72rem !important;
+  }
+
+  /* Recent Activity List & Rows */
+  .activity-list {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    gap: 8px !important;
+  }
+
+  .activity-item-row {
+    padding: 10px !important;
+    gap: 10px !important;
+    border-radius: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+  }
+
+  .activity-icon-badge {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .activity-icon-badge svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  .activity-details {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    gap: 2px !important;
+  }
+
+  .activity-main-line {
+    width: 100% !important;
+    min-width: 0 !important;
+    gap: 4px !important;
+  }
+
+  .activity-desc {
+    font-size: 0.84rem !important;
+    line-height: 1.25 !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .activity-meta-line {
+    gap: 4px 6px !important;
+    flex-wrap: wrap !important;
+    margin-top: 2px !important;
+  }
+
+  .activity-date {
+    font-size: 0.72rem !important;
+  }
+
+  .activity-category-pill {
+    font-size: 0.68rem !important;
+    padding: 1px 5px !important;
+  }
+
+  .activity-method-text {
+    font-size: 0.7rem !important;
+  }
+
+  .activity-right-col {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    justify-content: flex-start !important;
+    gap: 3px !important;
+    flex-shrink: 0 !important;
+    text-align: right !important;
+    padding-top: 0 !important;
+    border-top: none !important;
+  }
+
+  .activity-amount {
+    font-size: 0.88rem !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    line-height: 1.2 !important;
+  }
+
+  .activity-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 3px !important;
+  }
+
+  .btn-act-icon {
+    width: 26px !important;
+    height: 26px !important;
+    padding: 0 !important;
+  }
+
+  .btn-act-icon svg {
+    width: 13px !important;
+    height: 13px !important;
+  }
+
+  /* Monthly Comparison Graph Container */
+  .monthly-income-graph-container {
+    padding: 10px 8px !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  .chart-scroll-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 4px 2px !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(125, 4, 75, 0.25) transparent !important;
+  }
+
+  .chart-scroll-wrapper::-webkit-scrollbar {
+    display: block !important;
+    height: 4px !important;
+  }
+
+  .chart-scroll-wrapper::-webkit-scrollbar-thumb {
+    background-color: rgba(125, 4, 75, 0.25) !important;
+    border-radius: 4px !important;
+  }
+
+  .chart-scroll-content {
+    display: flex !important;
+    align-items: flex-end !important;
+    gap: 6px !important;
+    width: max-content !important;
+    min-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .monthly-bar-item {
+    min-width: 54px !important;
+    flex: 0 0 54px !important;
+    height: 165px !important;
+    padding: 3px 2px !important;
+    gap: 4px !important;
+  }
+
+  .bar-income-val {
+    font-size: 0.66rem !important;
+    min-height: 24px !important;
+  }
+
+  .val-inc, .val-exp {
+    font-size: 0.64rem !important;
+  }
+
+  .bar-single-track {
+    width: 36px !important;
+    height: 105px !important;
+    border-radius: 8px !important;
+  }
+
+  .chart-takeaway-strip {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding-top: 8px !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+
+  .takeaway-metric {
+    gap: 4px !important;
+    flex-wrap: wrap !important;
+    font-size: 0.76rem !important;
+    max-width: 100% !important;
+  }
+
+  .takeaway-label {
+    font-size: 0.72rem !important;
+  }
+
+  .takeaway-val {
+    font-size: 0.78rem !important;
+  }
+
+  .takeaway-divider {
+    display: none !important;
+  }
+
+  .takeaway-badge {
+    font-size: 0.7rem !important;
+    padding: 2px 6px !important;
   }
 
   /* Finance Table Full Responsive Scrolling */
@@ -1532,25 +1834,5 @@
 
   .finance-action-buttons-row {
     display: none !important;
-  }
-
-  .chart-takeaway-strip {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .takeaway-divider {
-    display: none;
-  }
-
-  .activity-item-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .activity-right-col {
-    justify-content: space-between;
-    padding-top: 0.4rem;
-    border-top: 1px solid rgba(20, 20, 20, 0.05);
   }
 }
