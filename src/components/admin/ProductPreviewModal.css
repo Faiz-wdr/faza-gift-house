@@ -254,9 +254,19 @@
 }
 
 @media (max-width: 480px) {
+  .preview-modal-backdrop {
+    padding: 0 !important;
+    align-items: stretch !important;
+  }
+
   .preview-modal-card {
-    height: 100vh;
-    border-radius: 0;
-    max-height: 100vh;
+    height: 100% !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+  }
+
+  .preview-modal-header {
+    padding-top: max(1rem, env(safe-area-inset-top, 0px)) !important;
   }
 }

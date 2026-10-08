@@ -1,29 +1,29 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  CheckCircle2, 
-  AlertCircle, 
-  Plus, 
-  Trash2, 
-  Edit3, 
-  ArrowUpRight, 
-  ArrowDownLeft, 
+import {
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle2,
+  AlertCircle,
+  Plus,
+  Trash2,
+  Edit2,
+  ArrowUpRight,
+  ArrowDownLeft,
   ArrowLeft,
   Search,
-  X, 
-  Calendar, 
+  X,
+  Calendar,
   Check,
   FileText
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Order } from "./AdminOrders";
-import { 
-  financeService, 
-  getCachedCategories, 
-  saveCachedCategory, 
-  deleteCachedCategory, 
-  type FinanceTransaction 
+import {
+  financeService,
+  getCachedCategories,
+  saveCachedCategory,
+  deleteCachedCategory,
+  type FinanceTransaction
 } from "../../services/financeService";
 import "./AdminFinance.css";
 
@@ -194,11 +194,11 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
   const monthlyProfitOrLoss = monthlyIncome - monthlyExpense;
   const isMonthlyProfit = monthlyProfitOrLoss >= 0;
 
-  // Overview recent activity (latest 6 across all records)
+  // Overview recent activity (latest 5 across all records)
   const overviewRecentActivities = useMemo(() => {
     return [...allMergedTransactions]
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 6);
+      .slice(0, 5);
   }, [allMergedTransactions]);
 
   // Filtered transactions for Table View
@@ -523,16 +523,16 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
               <h2 className="section-header-title">Finance</h2>
             </div>
             <div className="section-header-actions">
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="btn-finance-action btn-add-expense desktop-add-btn"
                 onClick={() => handleOpenAdd("expense")}
               >
                 <Plus size={15} />
                 <span>Add Expense</span>
               </button>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="btn-finance-action btn-add-income desktop-add-btn"
                 onClick={() => handleOpenAdd("income")}
               >
@@ -582,26 +582,6 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
             </div>
           </div>
 
-          {/* 3. PRIMARY ACTION BUTTONS */}
-          <div className="finance-action-buttons-row">
-            <button 
-              type="button" 
-              className="btn-finance-action btn-add-income"
-              onClick={() => handleOpenAdd("income")}
-            >
-              <Plus size={16} />
-              <span>Add Income</span>
-            </button>
-
-            <button 
-              type="button" 
-              className="btn-finance-action btn-add-expense"
-              onClick={() => handleOpenAdd("expense")}
-            >
-              <Plus size={16} />
-              <span>Add Expense</span>
-            </button>
-          </div>
 
           {/* 4. MAIN CONTENT GRID: RECENT ACTIVITY (LEFT) & MONTHLY INCOME GRAPH (RIGHT) */}
           <div className="finance-two-col-grid">
@@ -609,8 +589,8 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
             <div className="finance-section-card activity-section-card">
               <div className="section-card-header">
                 <h3 className="section-card-title">Recent Activity</h3>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="btn-view-all-link"
                   onClick={() => setViewMode("table")}
                 >
@@ -629,60 +609,22 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
                   {overviewRecentActivities.map((item) => {
                     const isIncome = item.type === "income";
 
+                    const categoryName = item.category?.trim() || item.description?.trim() || (isIncome ? "Income" : "Expense");
+
                     return (
-                      <div key={item.id} className="activity-item-row">
-                        <div className={`activity-icon-badge ${isIncome ? "income-badge" : "expense-badge"}`}>
-                          {isIncome ? <ArrowUpRight size={16} /> : <ArrowDownLeft size={16} />}
-                        </div>
-
-                        <div className="activity-details">
-                          <div className="activity-main-line">
-                            <span className="activity-desc">{item.description}</span>
+                      <div key={item.id} className="activity-item-row activity-item-row-minimal">
+                        <div className="activity-left-group">
+                          <div className={`activity-icon-badge ${isIncome ? "income-badge" : "expense-badge"}`}>
+                            {isIncome ? <ArrowUpRight size={15} /> : <ArrowDownLeft size={15} />}
                           </div>
-                          
-                          <div className="activity-meta-line">
-                            <span className="activity-date">{formatDateDisplay(item.date)}</span>
-                            {item.category && item.category !== "Order Payment" && (
-                              <span className="activity-category-pill">
-                                {item.category}
-                              </span>
-                            )}
-                            {item.paymentMethod && item.paymentMethod !== "Order Bill" && (
-                              <span className="activity-method-text">
-                                via {item.paymentMethod}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="activity-right-col">
-                          <span className={`activity-amount ${isIncome ? "text-income" : "text-expense"}`}>
-                            {isIncome ? "+" : "-"}₹{item.amount.toLocaleString("en-IN")}
+                          <span className="activity-category-name" title={categoryName}>
+                            {categoryName}
                           </span>
-
-                          {!item.isOrderLinked && (
-                            <div className="activity-actions">
-                              <button
-                                type="button"
-                                className="btn-act-icon"
-                                onClick={() => handleOpenEdit(item)}
-                                title="Edit transaction"
-                                aria-label="Edit transaction"
-                              >
-                                <Edit3 size={15} />
-                              </button>
-                              <button
-                                type="button"
-                                className="btn-act-icon delete-act"
-                                onClick={() => setDeleteConfirmId(item.id)}
-                                title="Delete transaction"
-                                aria-label="Delete transaction"
-                              >
-                                <Trash2 size={15} />
-                              </button>
-                            </div>
-                          )}
                         </div>
+
+                        <span className="activity-amount-minimal">
+                          ₹{item.amount.toLocaleString("en-IN")}
+                        </span>
                       </div>
                     );
                   })}
@@ -709,8 +651,8 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
 
               {/* Minimal monthly income & expense comparison graph */}
               <div className="monthly-income-graph-container">
-                <div 
-                  className="chart-scroll-wrapper" 
+                <div
+                  className="chart-scroll-wrapper"
                   ref={chartScrollRef}
                   title="Scroll left to view previous months"
                 >
@@ -737,8 +679,8 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
                       };
 
                       return (
-                        <div 
-                          key={item.key} 
+                        <div
+                          key={item.key}
                           className={`monthly-bar-item ${item.isSelected ? "active-month" : ""}`}
                           onClick={() => {
                             setCurrentDate(item.date);
@@ -753,13 +695,13 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
                             </div>
                           </div>
 
-                          <div 
+                          <div
                             className="bar-single-track"
                             title={`Income: ₹${incomeVal.toLocaleString("en-IN")} | Expense: ₹${expenseVal.toLocaleString("en-IN")}`}
                           >
                             {/* Income Layer (Green) */}
                             {incomeVal > 0 && (
-                              <motion.div 
+                              <motion.div
                                 className="bar-layer bar-layer-income"
                                 style={{
                                   zIndex: incomeVal >= expenseVal ? 1 : 2,
@@ -772,7 +714,7 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
 
                             {/* Expense Layer (Red) */}
                             {expenseVal > 0 && (
-                              <motion.div 
+                              <motion.div
                                 className="bar-layer bar-layer-expense"
                                 style={{
                                   zIndex: expenseVal > incomeVal ? 1 : 2,
@@ -827,39 +769,40 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
         <div className="finance-table-view-container">
           {/* Top Navigation & Month Switcher */}
           <div className="admin-section-header">
-            <div className="section-header-info">
+            <div className="section-header-info section-header-with-back">
+              <button
+                type="button"
+                className="btn-finance-back-icon"
+                onClick={() => setViewMode("overview")}
+                title="Back to Overview"
+                aria-label="Back to Overview"
+              >
+                <ArrowLeft size={18} strokeWidth={2.2} />
+              </button>
               <h2 className="section-header-title">Monthly Financials</h2>
             </div>
             <div className="section-header-actions">
-              <button 
-                type="button" 
-                className="btn-finance-back" 
-                onClick={() => setViewMode("overview")}
-              >
-                <ArrowLeft size={16} />
-                <span>Back to Overview</span>
-              </button>
 
               {/* Month Switcher for that month only */}
               <div className="month-selector-wrapper">
-                <button 
-                  type="button" 
-                  className="month-nav-btn" 
+                <button
+                  type="button"
+                  className="month-nav-btn"
                   onClick={handlePrevMonth}
                   title="Previous Month"
                   aria-label="Previous Month"
                 >
                   <ChevronLeft size={16} strokeWidth={2.5} />
                 </button>
-                
+
                 <div className="month-display-pill">
                   <Calendar size={15} className="month-icon" />
                   <span className="month-label-text">{monthLabel}</span>
                 </div>
 
-                <button 
-                  type="button" 
-                  className="month-nav-btn" 
+                <button
+                  type="button"
+                  className="month-nav-btn"
                   onClick={handleNextMonth}
                   title="Next Month"
                   aria-label="Next Month"
@@ -868,16 +811,16 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
                 </button>
               </div>
 
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="btn-finance-action btn-add-expense desktop-add-btn"
                 onClick={() => handleOpenAdd("expense")}
               >
                 <Plus size={15} />
                 <span>Add Expense</span>
               </button>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="btn-finance-action btn-add-income desktop-add-btn"
                 onClick={() => handleOpenAdd("income")}
               >
@@ -927,59 +870,39 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
             </div>
           </div>
 
-          {/* Action buttons */}
-          <div className="finance-action-buttons-row">
-            <button 
-              type="button" 
-              className="btn-finance-action btn-add-income"
-              onClick={() => handleOpenAdd("income")}
-            >
-              <Plus size={16} />
-              <span>Add Income</span>
-            </button>
-
-            <button 
-              type="button" 
-              className="btn-finance-action btn-add-expense"
-              onClick={() => handleOpenAdd("expense")}
-            >
-              <Plus size={16} />
-              <span>Add Expense</span>
-            </button>
-          </div>
 
           {/* Finance Table Card */}
           <div className="finance-table-card">
             <div className="finance-table-toolbar">
               <div className="table-filter-pills">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className={`filter-pill ${tableFilter === "all" ? "active" : ""}`}
                   onClick={() => setTableFilter("all")}
                 >
-                  All ({monthlyTransactions.length})
+                  All
                 </button>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className={`filter-pill ${tableFilter === "income" ? "active" : ""}`}
                   onClick={() => setTableFilter("income")}
                 >
-                  Income ({monthlyTransactions.filter((t) => t.type === "income").length})
+                  Income
                 </button>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className={`filter-pill ${tableFilter === "expense" ? "active" : ""}`}
                   onClick={() => setTableFilter("expense")}
                 >
-                  Expense ({monthlyTransactions.filter((t) => t.type === "expense").length})
+                  Expense
                 </button>
               </div>
 
               <div className="table-search-box">
                 <Search size={15} />
-                <input 
-                  type="text" 
-                  placeholder="Search records..." 
+                <input
+                  type="text"
+                  placeholder="Search records..."
                   value={tableSearch}
                   onChange={(e) => setTableSearch(e.target.value)}
                 />
@@ -1029,30 +952,38 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
                             {isIncome ? "+" : "-"}₹{item.amount.toLocaleString("en-IN")}
                           </td>
                           <td className="td-actions">
-                            {!item.isOrderLinked ? (
-                              <div className="row-action-btns">
-                                <button
-                                  type="button"
-                                  className="btn-act-icon"
-                                  onClick={() => handleOpenEdit(item)}
-                                  title="Edit transaction"
-                                  aria-label="Edit transaction"
-                                >
-                                  <Edit3 size={15} />
-                                </button>
-                                <button
-                                  type="button"
-                                  className="btn-act-icon delete-act"
-                                  onClick={() => setDeleteConfirmId(item.id)}
-                                  title="Delete transaction"
-                                  aria-label="Delete transaction"
-                                >
-                                  <Trash2 size={15} />
-                                </button>
-                              </div>
-                            ) : (
-                              <span className="td-locked-text" title="Managed directly in Orders">Auto</span>
-                            )}
+                            <div className="row-action-btns">
+                              <button
+                                type="button"
+                                className="action-icon-btn edit"
+                                onClick={() => {
+                                  if (item.isOrderLinked) {
+                                    alert(`This entry is linked to Order #${item.orderId || ""}. Please edit payment details in the Orders section.`);
+                                  } else {
+                                    handleOpenEdit(item);
+                                  }
+                                }}
+                                title={item.isOrderLinked ? `Order Payment (#${item.orderId || ""})` : "Edit transaction"}
+                                aria-label="Edit transaction"
+                              >
+                                <Edit2 size={15} />
+                              </button>
+                              <button
+                                type="button"
+                                className="action-icon-btn delete"
+                                onClick={() => {
+                                  if (item.isOrderLinked) {
+                                    alert(`This entry is automatically generated from Order #${item.orderId || ""}. To remove it, update the order payment status in the Orders section.`);
+                                  } else {
+                                    setDeleteConfirmId(item.id);
+                                  }
+                                }}
+                                title={item.isOrderLinked ? `Order Payment (#${item.orderId || ""})` : "Delete transaction"}
+                                aria-label="Delete transaction"
+                              >
+                                <Trash2 size={15} />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       );
@@ -1069,7 +1000,7 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
       <AnimatePresence>
         {modalType && (
           <div className="finance-modal-backdrop" onClick={handleCloseModal}>
-            <motion.div 
+            <motion.div
               className="finance-modal-card"
               onClick={(e) => e.stopPropagation()}
               initial={{ opacity: 0, scale: 0.94, y: 15 }}
@@ -1079,8 +1010,8 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
             >
               <div className="finance-modal-header">
                 <h3 className="finance-modal-title">
-                  {editingTransaction 
-                    ? (modalType === "income" ? "Edit Income" : "Edit Expense") 
+                  {editingTransaction
+                    ? (modalType === "income" ? "Edit Income" : "Edit Expense")
                     : (modalType === "income" ? "Add Income" : "Add Expense")}
                 </h3>
                 <button type="button" className="btn-modal-close" onClick={handleCloseModal}>
@@ -1179,12 +1110,12 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
                   <button type="button" className="btn-cancel" onClick={handleCloseModal}>
                     Cancel
                   </button>
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     className={`btn-submit ${modalType === "income" ? "btn-income-submit" : "btn-expense-submit"}`}
                   >
-                    {editingTransaction 
-                      ? "Save Changes" 
+                    {editingTransaction
+                      ? "Save Changes"
                       : (modalType === "income" ? "Add Income" : "Add Expense")}
                   </button>
                 </div>
@@ -1198,7 +1129,7 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
       <AnimatePresence>
         {deleteConfirmId && (
           <div className="finance-modal-backdrop" onClick={() => setDeleteConfirmId(null)}>
-            <motion.div 
+            <motion.div
               className="finance-confirm-modal"
               onClick={(e) => e.stopPropagation()}
               initial={{ opacity: 0, scale: 0.95 }}
@@ -1275,8 +1206,8 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
 
       {/* Mobile Floating Action Button Group: Income (Primary) & Expense (Secondary) */}
       <div className="admin-fab-group">
-        <button 
-          type="button" 
+        <button
+          type="button"
           className="admin-fab-btn admin-fab-secondary"
           onClick={() => handleOpenAdd("expense")}
           aria-label="Add Expense"
@@ -1284,8 +1215,8 @@ export default function AdminFinance({ orders }: AdminFinanceProps) {
           <Plus size={16} strokeWidth={2.4} />
           <span>Add Expense</span>
         </button>
-        <button 
-          type="button" 
+        <button
+          type="button"
           className="admin-fab-btn admin-fab-primary"
           onClick={() => handleOpenAdd("income")}
           aria-label="Add Income"

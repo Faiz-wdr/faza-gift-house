@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   LayoutDashboard, 
   Boxes, 
@@ -13,7 +13,10 @@ import {
   CheckCircle2,
   Wallet,
   ArrowUpRight,
-  Plus
+  Plus,
+  MoreHorizontal,
+  Settings,
+  X
 } from "lucide-react";
 import AdminProducts from "../components/admin/AdminProducts";
 import ProductFormModal from "../components/admin/ProductFormModal";
@@ -23,6 +26,7 @@ import AdminOrders from "../components/admin/AdminOrders";
 import type { Order } from "../components/admin/AdminOrders";
 import AdminAdBanner from "../components/admin/AdminAdBanner";
 import AdminFinance from "../components/admin/AdminFinance";
+import AdminSettings from "../components/admin/AdminSettings";
 import { authService } from "../services/authService";
 import { productService } from "../services/productService";
 import { orderService } from "../services/orderService";
@@ -35,6 +39,7 @@ export default function Admin() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [activeMenu, setActiveMenu] = useState("Dashboard");
+  const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
 
   // Products collection state
   const [products, setProducts] = useState<AdminProduct[]>([]);
@@ -389,6 +394,13 @@ export default function Admin() {
         </nav>
 
         <div className="sidebar-footer">
+          <button 
+            className={`menu-item ${activeMenu === "Settings" ? "active" : ""}`}
+            onClick={() => setActiveMenu("Settings")}
+          >
+            <Settings size={20} />
+            <span className="menu-text">Settings</span>
+          </button>
           <button className="menu-item logout-btn" onClick={handleLogout}>
             <LogOut size={20} />
             <span className="menu-text">Logout</span>
@@ -685,16 +697,25 @@ export default function Admin() {
                 </ErrorBoundary>
               </div>
             )}
+
+            {/* CONDITIONAL RENDER: SETTINGS VIEW */}
+            {activeMenu === "Settings" && (
+              <div className="dashboard-content">
+                <ErrorBoundary fallbackTitle="Error loading Settings section">
+                  <AdminSettings />
+                </ErrorBoundary>
+              </div>
+            )}
           </div>
         )}
       </div>
 
-      {/* MOBILE BOTTOM NAVIGATION BAR */}
+      {/* MOBILE BOTTOM NAVIGATION BAR - 4 ITEMS */}
       <nav className="admin-bottom-nav" aria-label="Mobile Navigation">
         <button 
           type="button"
-          className={`admin-bottom-nav-item ${activeMenu === "Dashboard" ? "active" : ""}`}
-          onClick={() => setActiveMenu("Dashboard")}
+          className={`admin-bottom-nav-item ${activeMenu === "Dashboard" && !mobileMoreOpen ? "active" : ""}`}
+          onClick={() => { setActiveMenu("Dashboard"); setMobileMoreOpen(false); }}
         >
           <LayoutDashboard size={20} />
           <span>Dashboard</span>
@@ -702,8 +723,8 @@ export default function Admin() {
 
         <button 
           type="button"
-          className={`admin-bottom-nav-item ${activeMenu === "Products" ? "active" : ""}`}
-          onClick={() => setActiveMenu("Products")}
+          className={`admin-bottom-nav-item ${activeMenu === "Products" && !mobileMoreOpen ? "active" : ""}`}
+          onClick={() => { setActiveMenu("Products"); setMobileMoreOpen(false); }}
         >
           <Boxes size={20} />
           <span>Products</span>
@@ -711,8 +732,8 @@ export default function Admin() {
 
         <button 
           type="button"
-          className={`admin-bottom-nav-item ${activeMenu === "Orders" ? "active" : ""}`}
-          onClick={() => setActiveMenu("Orders")}
+          className={`admin-bottom-nav-item ${activeMenu === "Orders" && !mobileMoreOpen ? "active" : ""}`}
+          onClick={() => { setActiveMenu("Orders"); setMobileMoreOpen(false); }}
         >
           <ShoppingBag size={20} />
           <span>Orders</span>
@@ -720,22 +741,106 @@ export default function Admin() {
 
         <button 
           type="button"
-          className={`admin-bottom-nav-item ${activeMenu === "Finance" ? "active" : ""}`}
-          onClick={() => setActiveMenu("Finance")}
+          className={`admin-bottom-nav-item ${
+            ["Finance", "AdBanner", "Settings"].includes(activeMenu) || mobileMoreOpen ? "active" : ""
+          }`}
+          onClick={() => setMobileMoreOpen((prev) => !prev)}
+          aria-expanded={mobileMoreOpen}
+          aria-label="More options"
         >
-          <Wallet size={20} />
-          <span>Finance</span>
-        </button>
-
-        <button 
-          type="button"
-          className={`admin-bottom-nav-item ${activeMenu === "AdBanner" ? "active" : ""}`}
-          onClick={() => setActiveMenu("AdBanner")}
-        >
-          <ImageIcon size={20} />
-          <span>Ad Banner</span>
+          <MoreHorizontal size={22} />
+          <span>More</span>
         </button>
       </nav>
+
+      {/* MOBILE MORE MENU SHEET */}
+      <AnimatePresence>
+        {mobileMoreOpen && (
+          <>
+            <motion.div
+              className="admin-more-backdrop"
+              onClick={() => setMobileMoreOpen(false)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            />
+            <motion.div
+              className="admin-more-sheet"
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 26, stiffness: 320 }}
+            >
+              <div className="admin-more-sheet-handle" />
+              <div className="admin-more-sheet-header">
+                <span className="admin-more-sheet-title">More Sections</span>
+                <button
+                  type="button"
+                  className="admin-more-close-btn"
+                  onClick={() => setMobileMoreOpen(false)}
+                  aria-label="Close menu"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="admin-more-sheet-list">
+                <button
+                  type="button"
+                  className={`admin-more-item ${activeMenu === "Finance" ? "active" : ""}`}
+                  onClick={() => {
+                    setActiveMenu("Finance");
+                    setMobileMoreOpen(false);
+                  }}
+                >
+                  <div className="admin-more-item-icon wallet">
+                    <Wallet size={20} />
+                  </div>
+                  <div className="admin-more-item-text">
+                    <span className="admin-more-label">Finance</span>
+                    <span className="admin-more-sub">Income, expenses & ledger</span>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  className={`admin-more-item ${activeMenu === "AdBanner" ? "active" : ""}`}
+                  onClick={() => {
+                    setActiveMenu("AdBanner");
+                    setMobileMoreOpen(false);
+                  }}
+                >
+                  <div className="admin-more-item-icon banner">
+                    <ImageIcon size={20} />
+                  </div>
+                  <div className="admin-more-item-text">
+                    <span className="admin-more-label">Ad Banner</span>
+                    <span className="admin-more-sub">Store promotional banners</span>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  className={`admin-more-item ${activeMenu === "Settings" ? "active" : ""}`}
+                  onClick={() => {
+                    setActiveMenu("Settings");
+                    setMobileMoreOpen(false);
+                  }}
+                >
+                  <div className="admin-more-item-icon settings">
+                    <Settings size={20} />
+                  </div>
+                  <div className="admin-more-item-text">
+                    <span className="admin-more-label">Settings</span>
+                    <span className="admin-more-sub">Store & invoice preferences</span>
+                  </div>
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* 3. MODALS ATTACHMENTS */}
       <ProductFormModal

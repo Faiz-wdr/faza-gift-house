@@ -1675,18 +1675,21 @@
 
 @media (max-width: 576px) {
   .order-modal-backdrop {
-    padding: 0;
+    padding: 0 !important;
+    align-items: stretch !important;
   }
 
   .order-modal-card {
-    height: 100vh;
-    max-width: 100%;
-    border-radius: 0;
-    border: none;
+    height: 100% !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    max-width: 100% !important;
+    border-radius: 0 !important;
+    border: none !important;
   }
 
   .order-modal-header {
-    padding: 1rem 1.2rem;
+    padding: max(1rem, env(safe-area-inset-top, 0px)) 1.2rem 1rem 1.2rem !important;
   }
 
   .form-sections-scroller {
